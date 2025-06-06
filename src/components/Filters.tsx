@@ -28,9 +28,9 @@ export function Filters({
   ];
 
   return (
-    <div className="flex flex-col items-center gap-5 mb-8 max-w-4xl mx-auto">
+    <div className="flex flex-col lg:flex-row items-center gap-3 lg:gap-3 w-full">
       {/* Primary Filters */}
-      <div className="flex flex-wrap gap-2 justify-center items-center max-w-2xl relative">
+      <div className="flex flex-wrap gap-1.5 lg:gap-2 justify-center lg:justify-start items-center">
         {primaryFilters.map((filter) => (
           <FilterButton
             key={filter.value}
@@ -42,12 +42,14 @@ export function Filters({
             {filter.label}
           </FilterButton>
         ))}
-        {/* Separator line */}
-        <div className="absolute -bottom-[11px] left-1/2 -translate-x-1/2 w-15 h-px bg-gradient-to-r from-transparent via-neutral-700 to-transparent" />
       </div>
 
+      {/* Separator */}
+      <div className="hidden lg:block w-px h-5 bg-neutral-700 flex-shrink-0"></div>
+      <div className="lg:hidden w-15 h-px bg-gradient-to-r from-transparent via-neutral-700 to-transparent"></div>
+
       {/* Subcategory Filters */}
-      <div className="flex flex-wrap gap-2 justify-center items-center max-w-2xl">
+      <div className="flex flex-wrap gap-1.5 lg:gap-2 justify-center lg:justify-start items-center flex-1 lg:min-w-0">
         {subcategories.map((category) => (
           <FilterButton
             key={category}
@@ -61,13 +63,17 @@ export function Filters({
         ))}
       </div>
 
+      {/* Separator */}
+      <div className="hidden lg:block w-px h-5 bg-neutral-700 flex-shrink-0"></div>
+      <div className="lg:hidden w-15 h-px bg-gradient-to-r from-transparent via-neutral-700 to-transparent"></div>
+
       {/* Clear Filters Button */}
-      <div className="flex justify-center mt-2">
+      <div className="flex justify-center lg:justify-end flex-shrink-0">
         <button
           onClick={onClearFilters}
-          className="px-4 py-1.5 bg-neutral-900 border border-neutral-800 rounded-2xl text-neutral-400 text-xs font-medium hover:bg-blue-400 hover:text-neutral-900 hover:border-blue-400 transition-all duration-300"
+          className="px-3 py-1.5 bg-neutral-900 border border-neutral-800 rounded-2xl text-neutral-400 text-xs font-medium hover:bg-blue-400 hover:text-neutral-900 hover:border-blue-400 transition-all duration-300"
         >
-          Clear All Filters
+          Clear
         </button>
       </div>
     </div>

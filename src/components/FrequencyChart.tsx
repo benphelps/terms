@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
 import type { AudioTerm } from "../types";
-import { harmanCurve, frequencyMapping } from "../data";
+import { frequencyMapping } from "../data";
 
 interface FrequencyChartProps {
   terms: AudioTerm[];
@@ -179,22 +179,6 @@ export function FrequencyChart({
         "none"
       );
 
-      // Draw Harman curve
-      const harmanLine = d3
-        .line<{ frequency: number; db: number }>()
-        .x((d) => xScale(d.frequency))
-        .y((d) => yScale(d.db / 25)) // Scale dB to sentiment range
-        .curve(d3.curveMonotoneX);
-
-      g.append("path")
-        .datum(harmanCurve)
-        .attr("class", "harman-curve")
-        .attr("d", harmanLine)
-        .attr("fill", "none")
-        .attr("stroke", "var(--color-purple-400)")
-        .attr("stroke-width", 2)
-        .attr("opacity", 0.4)
-        .style("filter", "drop-shadow(0 0 2px var(--color-purple-400))");
 
       // Prepare term data for plotting
       const processedTerms: Array<
@@ -586,8 +570,7 @@ export function FrequencyChart({
         This interactive chart plots audiophile terms by their primary frequency
         relevance (X-axis) and sentiment polarity (Y-axis). Circle size
         indicates relevance strength. Click any point to view detailed term
-        information. The purple line shows the Harman target curve as a
-        frequency response reference. Use the filters above to explore terms by
+        information. Use the filters above to explore terms by
         sentiment category and specific subcategories like &quot;Bass Character&quot; or
         &quot;Treble Character&quot;.
       </p>
