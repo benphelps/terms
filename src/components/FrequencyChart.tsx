@@ -319,10 +319,10 @@ export function FrequencyChart({
             showFrequencyRange(d, xScale, yScale, rangeGroup);
             pointsGroup
               .selectAll(".term-point")
-              .classed("dimmed", function(this: any, pd: any) { return pd.term !== d.term; });
+              .classed("dimmed", function(pd: unknown) { return (pd as typeof processedTerms[0]).term !== d.term; });
             pointsGroup
               .selectAll(".term-label")
-              .classed("dimmed", function(this: any, pd: any) { return pd.term !== d.term; });
+              .classed("dimmed", function(pd: unknown) { return (pd as typeof processedTerms[0]).term !== d.term; });
             showTooltip(event, d, tooltipSel);
           })
           .on("mouseout", function () {
@@ -476,8 +476,10 @@ export function FrequencyChart({
         const svgRect = svgRef.current?.getBoundingClientRect();
         if (!svgRect) return;
 
-        const mouseX = event.clientX - svgRect.left;
-        const mouseY = event.clientY - svgRect.top;
+        const clientX = 'clientX' in event ? event.clientX : event.touches[0].clientX;
+        const clientY = 'clientY' in event ? event.clientY : event.touches[0].clientY;
+        const mouseX = clientX - svgRect.left;
+        const mouseY = clientY - svgRect.top;
 
         // Set content and prepare for fade-in
         tooltip
