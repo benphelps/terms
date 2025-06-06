@@ -503,16 +503,28 @@ export function FrequencyChart({
         const tooltipWidth = tooltipRect.width;
         const tooltipHeight = tooltipRect.height;
 
-        // Check if tooltip would go off the right edge
+        // Calculate optimal tooltip position
         let finalX = mouseX + 10;
+        let finalY = mouseY - 10;
+
+        // Check if tooltip would go off the right edge
         if (mouseX + tooltipWidth + 20 > svgRect.width) {
           finalX = mouseX - tooltipWidth - 10;
         }
 
+        // Check if tooltip would go off the left edge
+        if (finalX < 0) {
+          finalX = 10; // Small margin from left edge
+        }
+
         // Check if tooltip would go off the bottom edge
-        let finalY = mouseY - 10;
         if (mouseY + tooltipHeight + 10 > svgRect.height) {
           finalY = mouseY - tooltipHeight - 10;
+        }
+
+        // Check if tooltip would go off the top edge
+        if (finalY < 0) {
+          finalY = 10; // Small margin from top edge
         }
 
         // Position and fade in tooltip
