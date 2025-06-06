@@ -1,0 +1,188 @@
+@import "tailwindcss";
+@import "@fortawesome/fontawesome-free/css/all.css";
+
+/* dark mode scrollbar */
+body {
+  color-scheme: dark;
+}
+
+/* Highlight for search matches */
+mark {
+  background: #60a5fa;
+  color: #0a0a0a;
+  border-radius: 0.25em;
+  padding: 0.08em 0.25em;
+  font-weight: 600;
+  box-shadow: 0 2px 8px 0 rgba(96, 165, 250, 0.4);
+  transition: background 0.2s;
+}
+
+/* Subtle highlight for modal */
+mark.modal-highlight {
+  background: #60a5fa;
+  box-shadow: 0 2px 8px 0 rgba(96, 165, 250, 0.4);
+  color: #0a0a0a;
+  font-weight: 500;
+  border-radius: 0.18em;
+  padding: 0.05em 0.18em;
+}
+
+/* Animated gradient borders for cards */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animated-border-positive {
+  background: linear-gradient(-45deg, #10b981, #34d399, #059669, #047857);
+  background-size: 400% 400%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+.animated-border-negative {
+  background: linear-gradient(-45deg, #fbbf24, #fde047, #eab308, #ca8a04);
+  background-size: 400% 400%;
+  animation: gradient-shift 4s ease infinite;
+}
+
+.animated-border-neutral {
+  background: linear-gradient(-45deg, #6b7280, #9ca3af, #64748b, #71717a);
+  background-size: 400% 400%;
+  animation: gradient-shift 5s ease infinite;
+}
+
+/* Subtle background gradients for card content */
+@keyframes background-glow {
+  0%,
+  100% {
+    opacity: 0.02;
+  }
+  50% {
+    opacity: 0.05;
+  }
+}
+
+.card-glow-positive {
+  background: radial-gradient(
+    ellipse at top,
+    rgba(16, 185, 129, 0.1) 0%,
+    transparent 70%
+  );
+  animation: background-glow 4s ease-in-out infinite;
+}
+
+.card-glow-negative {
+  background: radial-gradient(
+    ellipse at top,
+    rgba(251, 191, 36, 0.1) 0%,
+    transparent 70%
+  );
+  animation: background-glow 5s ease-in-out infinite;
+}
+
+.card-glow-neutral {
+  background: radial-gradient(
+    ellipse at top,
+    rgba(107, 114, 128, 0.08) 0%,
+    transparent 70%
+  );
+  animation: background-glow 6s ease-in-out infinite;
+}
+
+/* Scrollable expanded text with fade effect */
+.expanded-text-container {
+  max-height: 120px;
+  overflow-y: auto;
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.expanded-text-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.expanded-text-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.expanded-text-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.expanded-text-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Fade overlay - hidden when scrolled */
+.expanded-text-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(transparent, var(--color-neutral-900));
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.expanded-text-container.scrolled .expanded-text-fade {
+  opacity: 0;
+}
+
+/* Modal scrollbar styles */
+.modal-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.modal-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.modal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Chart styles */
+.term-point {
+  transition: all 0.1s ease;
+}
+
+.term-point:hover {
+  stroke-width: 3 !important;
+  filter: brightness(1.2) drop-shadow(0 0 5px rgba(255, 255, 255, 0.4)) !important;
+}
+
+.term-label {
+  pointer-events: none;
+  font-family: inherit;
+  opacity: 0.8;
+  transition: opacity 0.1s ease;
+}
+
+.term-point.dimmed {
+  opacity: 0.2;
+  filter: grayscale(0.8) !important;
+}
+
+.term-label.dimmed {
+  opacity: 0.2;
+}

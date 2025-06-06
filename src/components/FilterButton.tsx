@@ -1,0 +1,53 @@
+import type { FilterType } from "../types";
+
+interface FilterButtonProps {
+  filter: FilterType | string;
+  isActive: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+  type?: "primary" | "subcategory";
+}
+
+export function FilterButton({
+  filter,
+  isActive,
+  onClick,
+  children,
+}: FilterButtonProps) {
+  const getFilterColors = () => {
+    if (filter === "all")
+      return "border-blue-400/30 text-blue-400/70 hover:border-blue-400 hover:text-blue-400";
+    if (filter === "positive")
+      return "border-emerald-500/30 text-emerald-500/70 hover:border-emerald-500 hover:text-emerald-500";
+    if (filter === "negative")
+      return "border-amber-500/30 text-amber-500/70 hover:border-amber-500 hover:text-amber-500";
+    if (filter === "neutral")
+      return "border-neutral-500/30 text-neutral-500/70 hover:border-neutral-500 hover:text-neutral-500";
+    return "border-neutral-800 text-neutral-400 hover:border-blue-400 hover:text-blue-400";
+  };
+
+  const getActiveColors = () => {
+    if (filter === "all")
+      return "bg-neutral-800 text-blue-400 border-blue-400 font-bold shadow-md shadow-blue-400/30";
+    if (filter === "positive")
+      return "bg-neutral-800 text-emerald-500 border-emerald-500 font-bold shadow-md shadow-emerald-500/30";
+    if (filter === "negative")
+      return "bg-neutral-800 text-amber-500 border-amber-500 font-bold shadow-md shadow-amber-500/30";
+    if (filter === "neutral")
+      return "bg-neutral-800 text-neutral-500 border-neutral-500 font-bold shadow-md shadow-neutral-500/30";
+    return "bg-neutral-800 text-blue-400 border-blue-400 font-bold shadow-md shadow-blue-400/30";
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      className={`
+        px-2 py-1 border-2 rounded-2xl text-xs font-medium whitespace-nowrap min-h-6 flex items-center
+        transition-all duration-300 cursor-pointer bg-neutral-900
+        ${isActive ? getActiveColors() : getFilterColors()}
+      `}
+    >
+      {children}
+    </button>
+  );
+}

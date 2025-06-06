@@ -1,0 +1,33 @@
+import type { FrequencyMapping } from "../types";
+
+export const frequencyMapping: FrequencyMapping = {
+  Airy: { frequency: 12000, range: [10000, 20000], relevance: 0.9 },
+  Analytical: { frequency: 5000, range: [4000, 7000], relevance: 0.8 },
+  Boomy: { frequency: 150, range: [80, 250], relevance: 0.9 },
+  Bright: { frequency: 8000, range: [4000, 12000], relevance: 0.9 },
+  Coherent: { frequency: 2000, range: [20, 20000], relevance: 0.7 },
+  Dark: { frequency: 3000, range: [0, 5000], relevance: 0.8 },
+  Detailed: { frequency: 4000, range: [20, 20000], relevance: 0.8 },
+  Fatiguing: { frequency: 6500, range: [2500, 9000], relevance: 0.9 },
+  Fast: { frequency: 5000, range: [20, 20000], relevance: 0.8 },
+  Forward: { frequency: 2000, range: [1500, 3500], relevance: 0.9 },
+  Harsh: { frequency: 7000, range: [3000, 8000], relevance: 0.9 },
+  Imaging: { frequency: 8000, range: [20, 20000], relevance: 0.8 },
+  "Laid-Back": { frequency: 2500, range: [2000, 5000], relevance: 0.7 },
+  Lush: { frequency: 800, range: [200, 3000], relevance: 0.8 },
+  Muddy: { frequency: 120, range: [100, 250], relevance: 0.9 },
+  Musical: { frequency: 1500, range: [20, 20000], relevance: 0.7 },
+  Neutral: { frequency: 1000, range: [20, 20000], relevance: 0.6 },
+  Punchy: { frequency: 80, range: [80, 150], relevance: 0.9 },
+  Sibilant: { frequency: 8500, range: [6000, 10000], relevance: 0.9 },
+  Slam: { frequency: 40, range: [20, 60], relevance: 0.9 },
+  Smooth: { frequency: 2000, range: [1500, 4000], relevance: 0.8 },
+  Soundstage: { frequency: 10000, range: [8000, 20000], relevance: 0.7 },
+  Thin: { frequency: 250, range: [200, 400], relevance: 0.8 },
+  Timbre: { frequency: 1500, range: [20, 20000], relevance: 0.8 },
+  Tight: { frequency: 60, range: [40, 80], relevance: 0.9 },
+  "V-Shaped": { frequency: 5000, range: [80, 12000], relevance: 0.7 },
+  Veiled: { frequency: 5000, range: [3000, 7000], relevance: 0.8 },
+  Warm: { frequency: 500, range: [200, 1000], relevance: 0.8 },
+  // Add more frequency mappings here...
+};
