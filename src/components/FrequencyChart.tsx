@@ -319,10 +319,10 @@ export function FrequencyChart({
             showFrequencyRange(d, xScale, yScale, rangeGroup);
             pointsGroup
               .selectAll(".term-point")
-              .classed("dimmed", (pd: typeof processedTerms[0]) => pd.term !== d.term);
+              .classed("dimmed", function(this: any, pd: any) { return pd.term !== d.term; });
             pointsGroup
               .selectAll(".term-label")
-              .classed("dimmed", (pd: typeof processedTerms[0]) => pd.term !== d.term);
+              .classed("dimmed", function(this: any, pd: any) { return pd.term !== d.term; });
             showTooltip(event, d, tooltipSel);
           })
           .on("mouseout", function () {
