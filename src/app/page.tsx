@@ -13,7 +13,6 @@ import type { AudioTerm } from "@/types";
 export default function HomePage() {
   const [expandedTermId, setExpandedTermId] = useState<string | null>(null);
   const [isFiltersSticky, setIsFiltersSticky] = useState(false);
-  const filtersRef = useRef<HTMLDivElement>(null);
   const filtersPlaceholderRef = useRef<HTMLDivElement>(null);
 
   const { searchQuery, setSearchQuery, searchResults, hasSearchQuery } =
