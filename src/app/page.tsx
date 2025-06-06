@@ -80,7 +80,7 @@ export default function HomePage() {
   const handleOpenTerm = (term: AudioTerm) => {
     const slug = term.term.toLowerCase().replace(/\s+/g, '-');
     if (typeof window !== 'undefined') {
-      window.location.href = `/${slug}/`;
+      window.location.href = `/${slug}`;
     }
   };
 

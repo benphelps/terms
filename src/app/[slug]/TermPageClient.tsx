@@ -21,7 +21,7 @@ export function TermPageClient({ termData: term }: TermPageClientProps) {
       // Navigate to the specific term page
       const slug = actualTerm.term.toLowerCase().replace(/\s+/g, "-");
       if (typeof window !== "undefined") {
-        window.location.href = `/${slug}/`;
+        window.location.href = `/${slug}`;
       }
     } else {
       // Navigate to home page with search query
