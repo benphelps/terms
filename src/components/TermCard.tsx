@@ -75,11 +75,10 @@ export function TermCard({
 
   useEffect(() => {
     if (shouldExpand && expandedTextRef.current) {
-      expandedTextRef.current.addEventListener("scroll", handleScroll);
+      const element = expandedTextRef.current;
+      element.addEventListener("scroll", handleScroll);
       return () => {
-        if (expandedTextRef.current) {
-          expandedTextRef.current.removeEventListener("scroll", handleScroll);
-        }
+        element.removeEventListener("scroll", handleScroll);
       };
     }
   }, [shouldExpand]);

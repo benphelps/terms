@@ -16,7 +16,7 @@ interface AudioState {
 }
 
 let globalAudioState: AudioState | null = null;
-let progressCallbacks: Set<(query: string, progress: number, duration: number) => void> = new Set();
+const progressCallbacks: Set<(query: string, progress: number, duration: number) => void> = new Set();
 
 export const useMusicPlayer = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -72,7 +72,7 @@ export const useMusicPlayer = () => {
       }
 
       return null;
-    } catch (error) {
+    } catch {
       return null;
     } finally {
       setIsLoading(false);

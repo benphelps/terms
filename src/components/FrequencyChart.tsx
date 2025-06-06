@@ -222,8 +222,8 @@ export function FrequencyChart({
       // Position simulation to avoid overlaps
       const simulation = d3
         .forceSimulation(processedTerms)
-        .force("x", d3.forceX((d: any) => xScale(d.frequency)).strength(0.8))
-        .force("y", d3.forceY((d: any) => yScale(d.sentiment)).strength(0.8))
+        .force("x", d3.forceX((d: typeof processedTerms[0]) => xScale(d.frequency)).strength(0.8))
+        .force("y", d3.forceY((d: typeof processedTerms[0]) => yScale(d.sentiment)).strength(0.8))
         .force("collide", d3.forceCollide().radius(10).strength(1))
         .stop();
 
@@ -273,7 +273,7 @@ export function FrequencyChart({
       // Add term points (with touch support for mobile)
       const isTouchDevice =
         "ontouchstart" in window || navigator.maxTouchPoints > 0;
-      let lastHoverTerm: any = null;
+      let lastHoverTerm: typeof processedTerms[0] | null = null;
       const tooltipSel = d3.select(tooltipRef.current!);
       tooltipSel.style("pointer-events", isTouchDevice ? "auto" : "none");
       if (isTouchDevice) {
@@ -291,8 +291,8 @@ export function FrequencyChart({
         .enter()
         .append("circle")
         .attr("class", "term-point")
-        .attr("cx", (d: any) => d.x)
-        .attr("cy", (d: any) => d.y)
+        .attr("cx", (d: typeof processedTerms[0]) => d.x!)
+        .attr("cy", (d: typeof processedTerms[0]) => d.y!)
         .attr("r", (d) => rScale(d.relevance))
         .attr("fill", (d) => getColorForSentiment(d.sentiment))
         .attr(
@@ -319,10 +319,10 @@ export function FrequencyChart({
             showFrequencyRange(d, xScale, yScale, rangeGroup);
             pointsGroup
               .selectAll(".term-point")
-              .classed("dimmed", (pd: any) => pd.term !== d.term);
+              .classed("dimmed", (pd: typeof processedTerms[0]) => pd.term !== d.term);
             pointsGroup
               .selectAll(".term-label")
-              .classed("dimmed", (pd: any) => pd.term !== d.term);
+              .classed("dimmed", (pd: typeof processedTerms[0]) => pd.term !== d.term);
             showTooltip(event, d, tooltipSel);
           })
           .on("mouseout", function () {
@@ -344,8 +344,8 @@ export function FrequencyChart({
         .enter()
         .append("text")
         .attr("class", "term-label")
-        .attr("x", (d: any) => d.x)
-        .attr("y", (d: any) => d.y + 22)
+        .attr("x", (d: typeof processedTerms[0]) => d.x!)
+        .attr("y", (d: typeof processedTerms[0]) => d.y! + 22)
         .attr("text-anchor", "middle")
         .attr("font-size", "11px")
         .attr("fill", "var(--color-neutral-300)")
@@ -394,10 +394,10 @@ export function FrequencyChart({
 
       // Helper functions
       function showFrequencyRange(
-        termData: any,
-        xScale: any,
-        yScale: any,
-        rangeGroup: any
+        termData: typeof processedTerms[0],
+        xScale: d3.ScaleLogarithmic<number, number, never>,
+        yScale: d3.ScaleLinear<number, number, never>,
+        rangeGroup: d3.Selection<SVGGElement, unknown, null, undefined>
       ) {
         rangeGroup.selectAll("*").remove();
 
@@ -453,7 +453,7 @@ export function FrequencyChart({
           .attr("opacity", 1);
       }
 
-      function showTooltip(event: any, termData: any, tooltip: any) {
+      function showTooltip(event: MouseEvent | TouchEvent, termData: typeof processedTerms[0], tooltip: d3.Selection<HTMLDivElement, unknown, null, undefined>) {
         const freqData = frequencyMapping[termData.term];
         const sentimentValue = termData.sentiment;
 
@@ -523,7 +523,7 @@ export function FrequencyChart({
           .style("opacity", 1);
       }
 
-      function hideTooltip(tooltip: any) {
+      function hideTooltip(tooltip: d3.Selection<HTMLDivElement, unknown, null, undefined>) {
         tooltip.style("visibility", "hidden").style("opacity", 0);
       }
     };
@@ -574,8 +574,8 @@ export function FrequencyChart({
         indicates relevance strength. Click any point to view detailed term
         information. The purple line shows the Harman target curve as a
         frequency response reference. Use the filters above to explore terms by
-        sentiment category and specific subcategories like "Bass Character" or
-        "Treble Character".
+        sentiment category and specific subcategories like &quot;Bass Character&quot; or
+        &quot;Treble Character&quot;.
       </p>
     </section>
   );
