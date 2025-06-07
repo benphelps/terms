@@ -14,6 +14,7 @@ export function TestTracks({ tracks }: TestTracksProps) {
   const [isMuted, setIsMuted] = useState(false);
   const [volumeBeforeMute, setVolumeBeforeMute] = useState(0.5);
   const volumeAreaRef = useRef<HTMLDivElement>(null);
+  const closeVolumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const tracksPerPage = 3;
   const totalPages = Math.ceil(tracks.length / tracksPerPage);
 
@@ -34,10 +35,30 @@ export function TestTracks({ tracks }: TestTracksProps) {
     updateVolume(newVolume);
   };
 
+  const scheduleVolumeClose = useCallback(() => {
+    if (closeVolumeTimeoutRef.current) {
+      clearTimeout(closeVolumeTimeoutRef.current);
+    }
+    closeVolumeTimeoutRef.current = setTimeout(() => {
+      setShowVolumeOnMobile(false);
+    }, 3000); // Close after 3 seconds
+  }, []);
+
   const handleVolumeClick = () => {
     if (isMobile) {
       // Mobile: toggle volume control visibility
-      setShowVolumeOnMobile(!showVolumeOnMobile);
+      const newState = !showVolumeOnMobile;
+      setShowVolumeOnMobile(newState);
+      
+      // If opening volume control, schedule auto-close
+      if (newState) {
+        scheduleVolumeClose();
+      } else {
+        // If manually closing, clear the timeout
+        if (closeVolumeTimeoutRef.current) {
+          clearTimeout(closeVolumeTimeoutRef.current);
+        }
+      }
     } else {
       // Desktop: toggle mute
       if (isMuted) {
@@ -74,7 +95,12 @@ export function TestTracks({ tracks }: TestTracksProps) {
         }
       }
     }
-  }, [isMuted]);
+
+    // On mobile, if volume control is open and user adjusts volume, reset the close timer
+    if (isMobile && showVolumeOnMobile) {
+      scheduleVolumeClose();
+    }
+  }, [isMuted, isMobile, showVolumeOnMobile, scheduleVolumeClose]);
 
   const getVolumeIcon = () => {
     if (isMuted || volume === 0) return <VolumeX className="w-4 h-4" />;
@@ -104,6 +130,15 @@ export function TestTracks({ tracks }: TestTracksProps) {
     };
   }, [volume, updateVolume]);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (closeVolumeTimeoutRef.current) {
+        clearTimeout(closeVolumeTimeoutRef.current);
+      }
+    };
+  }, []);
+
   if (tracks.length === 0) return null;
 
   return (
@@ -115,11 +150,19 @@ export function TestTracks({ tracks }: TestTracksProps) {
         {totalPages > 1 && (
           <div className="flex items-center gap-2">
             {/* Volume Control */}
-            <div className="flex items-center group" ref={volumeAreaRef}>
-              <div className={`flex items-center gap-2 mr-2 min-w-[120px] transition-all duration-200 ${
+            <div className="relative flex items-center group" ref={volumeAreaRef}>
+              <button
+                onClick={handleVolumeClick}
+                className="w-6 h-6 flex items-center justify-center rounded text-neutral-400 hover:text-neutral-200 transition-colors"
+                aria-label={isMobile ? "Volume control" : (isMuted ? "Unmute" : "Mute")}
+              >
+                {getVolumeIcon()}
+              </button>
+              
+              <div className={`absolute right-6 top-0 flex items-center gap-2 min-w-[120px] transition-all duration-200 rounded-lg px-2 py-1 bg-neutral-900 shadow-xl ${
                 isMobile 
-                  ? (showVolumeOnMobile ? 'opacity-100 visible' : 'opacity-0 invisible w-0 overflow-hidden')
-                  : 'opacity-0 invisible w-0 overflow-hidden group-hover:opacity-100 group-hover:visible group-hover:w-auto'
+                  ? (showVolumeOnMobile ? 'opacity-100 visible' : 'opacity-0 invisible')
+                  : 'opacity-0 invisible group-hover:opacity-100 group-hover:visible'
               }`}>
                 <input
                   type="range"
@@ -134,14 +177,6 @@ export function TestTracks({ tracks }: TestTracksProps) {
                   {Math.round(volume * 100)}%
                 </span>
               </div>
-              
-              <button
-                onClick={handleVolumeClick}
-                className="w-6 h-6 flex items-center justify-center rounded text-neutral-400 hover:text-neutral-200 transition-colors"
-                aria-label={isMobile ? "Volume control" : (isMuted ? "Unmute" : "Mute")}
-              >
-                {getVolumeIcon()}
-              </button>
             </div>
 
             <button

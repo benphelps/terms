@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { AudioTerm } from "../types";
 import { audioTermTracks } from "../data/tracksData";
 import { TestTracks } from "./TestTracks";
@@ -8,6 +9,7 @@ interface TermPageContentProps {
   onSearchTerm: (term: string) => void;
   onOpenTerm: (term: AudioTerm) => void;
   termsData: AudioTerm[];
+  onBackToHome?: () => void;
 }
 
 function highlightText(
@@ -30,6 +32,7 @@ export function TermPageContent({
   onSearchTerm,
   onOpenTerm,
   termsData,
+  onBackToHome,
 }: TermPageContentProps) {
   const handleRelatedTermClick = (relatedTerm: string) => {
     // Check if this is an actual term in our dictionary
@@ -50,25 +53,45 @@ export function TermPageContent({
     <>
       {/* Term Header */}
       <div className="mb-6">
-        <div className="flex items-center gap-4 mb-4">
-          <h1 
-            className="text-4xl font-bold text-neutral-200"
-            dangerouslySetInnerHTML={{
-              __html: highlightText(term.term, searchQuery, "modal-highlight"),
-            }}
-          />
-          <div
-            className={`
-            w-3 h-3 rounded-full
-            ${
-              term.primaryCategory === "positive"
-                ? "bg-emerald-500 shadow-lg shadow-emerald-500/50"
-                : term.primaryCategory === "negative"
-                ? "bg-amber-500 shadow-lg shadow-amber-500/50"
-                : "bg-neutral-500 shadow-lg shadow-neutral-300/50"
-            }
-          `}
-          />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4">
+            <h1 
+              className="text-4xl font-bold text-neutral-200"
+              dangerouslySetInnerHTML={{
+                __html: highlightText(term.term, searchQuery, "modal-highlight"),
+              }}
+            />
+            <div
+              className={`
+              w-3 h-3 rounded-full
+              ${
+                term.primaryCategory === "positive"
+                  ? "bg-emerald-500 shadow-lg shadow-emerald-500/50"
+                  : term.primaryCategory === "negative"
+                  ? "bg-amber-500 shadow-lg shadow-amber-500/50"
+                  : "bg-neutral-500 shadow-lg shadow-neutral-300/50"
+              }
+            `}
+            />
+          </div>
+          
+          {onBackToHome ? (
+            <button
+              onClick={onBackToHome}
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-neutral-800/80 backdrop-blur-sm border border-neutral-700 text-neutral-200 hover:bg-neutral-700/80 hover:text-white transition-all duration-300 shadow-lg"
+            >
+              <i className="fas fa-arrow-left"></i>
+              <span className="hidden sm:inline">Back to Home</span>
+            </button>
+          ) : (
+            <Link
+              href="/"
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-neutral-800/80 backdrop-blur-sm border border-neutral-700 text-neutral-200 hover:bg-neutral-700/80 hover:text-white transition-all duration-300 shadow-lg"
+            >
+              <i className="fas fa-arrow-left"></i>
+              <span className="hidden sm:inline">Back to Home</span>
+            </Link>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-2 mb-4">
