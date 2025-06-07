@@ -284,9 +284,10 @@ mark.modal-highlight {
 
 .term-point.dimmed {
   opacity: 0.2;
-  filter: grayscale(0.8) !important;
+  filter: grayscale(0.8) blur(3px) !important;
 }
 
 .term-label.dimmed {
   opacity: 0.2;
+  filter: blur(2px);
 }
