@@ -39,6 +39,10 @@ export function FrequencyChart({
         .attr("height", height)
         .attr("viewBox", `0 0 ${containerWidth} ${height}`)
         .attr("preserveAspectRatio", "xMidYMid meet")
+        .style("user-select", "none")
+        .style("-webkit-user-select", "none")
+        .style("-moz-user-select", "none")
+        .style("-ms-user-select", "none")
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -239,11 +243,16 @@ export function FrequencyChart({
 
       // Create frequency ranges group
       const rangeGroup = g.append("g").attr("class", "frequency-ranges");
+      const leaderLinesGroup = g.append("g").attr("class", "leader-lines");
       const pointsGroup = g.append("g").attr("class", "term-points");
 
-      // Radius scale
-      const minR = 4,
-        maxR = 10;
+      // Add term points (with touch support for mobile)
+      const isTouchDevice =
+        "ontouchstart" in window || navigator.maxTouchPoints > 0;
+
+      // Radius scale - smaller on mobile
+      const minR = isTouchDevice ? 3 : 4,
+        maxR = isTouchDevice ? 7 : 10;
       const relExtent = d3.extent(processedTerms, (d) => d.relevance) as [
         number,
         number
@@ -253,10 +262,6 @@ export function FrequencyChart({
         .exponent(2)
         .domain(relExtent)
         .range([minR, maxR]);
-
-      // Add term points (with touch support for mobile)
-      const isTouchDevice =
-        "ontouchstart" in window || navigator.maxTouchPoints > 0;
       let lastHoverTerm: typeof processedTerms[0] | null = null;
       const tooltipSel = d3.select(tooltipRef.current!);
       tooltipSel.style("pointer-events", isTouchDevice ? "auto" : "none");
@@ -321,8 +326,8 @@ export function FrequencyChart({
           });
       }
 
-      // Add term labels
-      pointsGroup
+      // Add term labels with smart positioning
+      const labels = pointsGroup
         .selectAll(".term-label")
         .data(processedTerms)
         .enter()
@@ -331,9 +336,12 @@ export function FrequencyChart({
         .attr("x", (d: typeof processedTerms[0]) => d.x!)
         .attr("y", (d: typeof processedTerms[0]) => d.y! + 22)
         .attr("text-anchor", "middle")
-        .attr("font-size", "11px")
+        .attr("font-size", isTouchDevice ? "9px" : "11px")
         .attr("fill", "var(--color-neutral-300)")
         .text((d) => d.term);
+
+      // Apply smart positioning to prevent overlaps
+      applySmartLabelPositioning(labels, leaderLinesGroup, processedTerms, rScale, isTouchDevice);
 
       // Add chart title
       svg
@@ -523,6 +531,155 @@ export function FrequencyChart({
 
       function hideTooltip(tooltip: d3.Selection<HTMLDivElement, unknown, null, undefined>) {
         tooltip.style("visibility", "hidden").style("opacity", 0);
+      }
+
+      // Smart label positioning function
+      function applySmartLabelPositioning(
+        labels: d3.Selection<SVGTextElement, typeof processedTerms[0], SVGGElement, unknown>,
+        leaderLinesGroup: d3.Selection<SVGGElement, unknown, null, undefined>,
+        data: typeof processedTerms,
+        radiusScale: d3.ScalePower<number, number, never>,
+        isMobile: boolean
+      ) {
+        interface LabelBounds {
+          x: number;
+          y: number;
+          width: number;
+          height: number;
+          element: SVGTextElement;
+          data: typeof processedTerms[0];
+        }
+
+        // Get bounding boxes for all labels
+        const labelBounds: LabelBounds[] = [];
+        labels.each(function(d) {
+          const bbox = this.getBBox();
+          labelBounds.push({
+            x: bbox.x,
+            y: bbox.y,
+            width: bbox.width,
+            height: bbox.height,
+            element: this,
+            data: d
+          });
+        });
+
+        // Check for collisions and reposition
+        const repositioned: Array<{label: SVGTextElement, newX: number, newY: number, originalX: number, originalY: number}> = [];
+        const padding = isMobile ? 4 : 6;
+        
+        for (let i = 0; i < labelBounds.length; i++) {
+          const current = labelBounds[i];
+          let hasCollision = false;
+
+          // Check against all other labels
+          for (let j = 0; j < labelBounds.length; j++) {
+            if (i === j) continue;
+            const other = labelBounds[j];
+
+            // Check for overlap with padding
+            if (current.x < other.x + other.width + padding &&
+                current.x + current.width + padding > other.x &&
+                current.y < other.y + other.height + padding &&
+                current.y + current.height + padding > other.y) {
+              hasCollision = true;
+              break;
+            }
+          }
+
+          if (hasCollision) {
+            // Try different positions around the dot
+            const dotX = current.data.x!;
+            const dotY = current.data.y!;
+            const dotRadius = radiusScale(current.data.relevance);
+            const offset = isMobile ? 15 : 20;
+
+            const candidatePositions = [
+              { x: dotX, y: dotY - offset - dotRadius, anchor: "middle" }, // above
+              { x: dotX + offset + dotRadius, y: dotY + 4, anchor: "start" }, // right
+              { x: dotX, y: dotY + offset + dotRadius, anchor: "middle" }, // below
+              { x: dotX - offset - dotRadius, y: dotY + 4, anchor: "end" }, // left
+              { x: dotX + offset/1.5, y: dotY - offset/1.5, anchor: "start" }, // top-right
+              { x: dotX - offset/1.5, y: dotY - offset/1.5, anchor: "end" }, // top-left
+              { x: dotX + offset/1.5, y: dotY + offset/1.5, anchor: "start" }, // bottom-right
+              { x: dotX - offset/1.5, y: dotY + offset/1.5, anchor: "end" }, // bottom-left
+            ];
+
+            // Find first position without collision
+            let bestPosition = candidatePositions[0];
+            for (const pos of candidatePositions) {
+              // Check bounds
+              if (pos.x < 0 || pos.x > chartWidth || pos.y < 0 || pos.y > chartHeight) continue;
+
+              // Check collision with other labels
+              let positionClear = true;
+              const tempBBox = { x: pos.x - 35, y: pos.y - 10, width: 70, height: 20 }; // estimated bbox with more padding
+              
+              for (const other of labelBounds) {
+                if (other === current) continue;
+                if (tempBBox.x < other.x + other.width + padding &&
+                    tempBBox.x + tempBBox.width + padding > other.x &&
+                    tempBBox.y < other.y + other.height + padding &&
+                    tempBBox.y + tempBBox.height + padding > other.y) {
+                  positionClear = false;
+                  break;
+                }
+              }
+
+              if (positionClear) {
+                bestPosition = pos;
+                break;
+              }
+            }
+
+            // Store repositioning info
+            repositioned.push({
+              label: current.element,
+              newX: bestPosition.x,
+              newY: bestPosition.y,
+              originalX: dotX,
+              originalY: dotY
+            });
+
+            // Update the label position and text anchor
+            d3.select(current.element)
+              .attr("x", bestPosition.x)
+              .attr("y", bestPosition.y)
+              .attr("text-anchor", bestPosition.anchor);
+
+            // Update bounds for future collision checks
+            current.x = bestPosition.x - 35;
+            current.y = bestPosition.y - 10;
+          }
+        }
+
+        // Add leader lines for repositioned labels
+        repositioned.forEach(({ newX, newY, originalX, originalY, label }) => {
+          const distance = Math.sqrt(Math.pow(newX - originalX, 2) + Math.pow(newY - originalY, 2));
+          
+          // Only add leader line if label moved significantly
+          if (distance > 15) {
+            // Get the dot radius for this label
+            const labelData = d3.select(label).datum() as typeof processedTerms[0];
+            const dotRadius = radiusScale(labelData.relevance);
+            
+            // Calculate line start point at edge of dot
+            const angle = Math.atan2(newY - originalY, newX - originalX);
+            const startX = originalX + Math.cos(angle) * dotRadius;
+            const startY = originalY + Math.sin(angle) * dotRadius;
+            
+            leaderLinesGroup
+              .append("line")
+              .attr("x1", startX)
+              .attr("y1", startY)
+              .attr("x2", newX)
+              .attr("y2", newY - 4)
+              .attr("stroke", "#a3a3a3") // Lighter gray
+              .attr("stroke-width", 1.5)
+              .attr("opacity", 0.7)
+              .attr("stroke-dasharray", "4,2");
+          }
+        });
       }
     };
 
