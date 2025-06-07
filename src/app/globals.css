@@ -6,6 +6,29 @@ body {
   color-scheme: dark;
 }
 
+/* Fix mobile landscape white edges */
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure full viewport coverage on mobile landscape */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  html, body {
+    min-width: 100vw;
+    width: 100vw;
+  }
+  
+  /* Prevent horizontal scrolling on landscape mobile */
+  .container {
+    max-width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
 /* Highlight for search matches */
 mark {
   background: #60a5fa;

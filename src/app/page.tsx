@@ -105,7 +105,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-200 pb-10">
+    <div className="min-h-screen w-full bg-neutral-950 text-neutral-200 pb-10">
       {/* Background gradients */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div
