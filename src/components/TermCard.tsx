@@ -151,7 +151,7 @@ export function TermCard({
 
         {/* Header */}
         <div className="relative flex items-center justify-between mb-3 z-10">
-          <h3
+          <h2
             className="text-xl font-semibold text-neutral-200"
             dangerouslySetInnerHTML={{
               __html: highlightText(term.term, searchQuery),
