@@ -15,23 +15,30 @@ export default function HomePage() {
   const [expandedTermId, setExpandedTermId] = useState<string | null>(null);
   const [isFiltersSticky, setIsFiltersSticky] = useState(false);
   const [selectedTerm, setSelectedTerm] = useState<AudioTerm | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const filtersPlaceholderRef = useRef<HTMLDivElement>(null);
   const subcategoryScrollRef = useRef<HTMLDivElement>(null);
   const stickySubcategoryScrollRef = useRef<HTMLDivElement>(null);
 
-  const scrollSubcategories = (direction: 'left' | 'right', isSticky = false) => {
-    const scrollContainer = isSticky ? stickySubcategoryScrollRef.current : subcategoryScrollRef.current;
+  const scrollSubcategories = (
+    direction: "left" | "right",
+    isSticky = false
+  ) => {
+    const scrollContainer = isSticky
+      ? stickySubcategoryScrollRef.current
+      : subcategoryScrollRef.current;
     if (!scrollContainer) return;
 
     const scrollAmount = 200; // pixels to scroll
     const currentScroll = scrollContainer.scrollLeft;
-    const targetScroll = direction === 'left' 
-      ? Math.max(0, currentScroll - scrollAmount)
-      : currentScroll + scrollAmount;
+    const targetScroll =
+      direction === "left"
+        ? Math.max(0, currentScroll - scrollAmount)
+        : currentScroll + scrollAmount;
 
     scrollContainer.scrollTo({
       left: targetScroll,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   };
 
@@ -43,22 +50,12 @@ export default function HomePage() {
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
       const searchParam = urlParams.get("search");
-      const path = window.location.pathname;
-      
+
       if (searchParam) {
         setSearchQuery(searchParam);
       }
-      
-      // Check if we're on a term page (any path that's not just "/")
-      if (path !== "/" && path !== "") {
-        const slug = path.replace("/", "");
-        const term = termsData.find(
-          t => t.term.toLowerCase().replace(/\s+/g, "-") === slug
-        );
-        if (term) {
-          setSelectedTerm(term);
-        }
-      }
+
+      // Term pages are now handled by [slug]/page.tsx, so we only handle homepage here
     }
   }, [setSearchQuery]);
 
@@ -111,27 +108,47 @@ export default function HomePage() {
   };
 
   const handleOpenTerm = (term: AudioTerm) => {
-    setSelectedTerm(term);
-    const slug = term.term.toLowerCase().replace(/\s+/g, "-");
-    if (typeof window !== "undefined") {
-      // Update URL to clean path
-      window.history.pushState({}, "", `/${slug}`);
-    }
+    setIsTransitioning(true);
+    // Brief fade out
+    setTimeout(() => {
+      setSelectedTerm(term);
+      const slug = term.term.toLowerCase().replace(/\s+/g, "-");
+      if (typeof window !== "undefined") {
+        // Update URL to clean path
+        window.history.pushState({}, "", `/${slug}`);
+      }
+      // Fade back in
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 50);
+    }, 150);
   };
 
   const handleCloseModal = () => {
-    setSelectedTerm(null);
-    if (typeof window !== "undefined") {
-      // Go back to homepage
-      window.history.pushState({}, "", "/");
-    }
+    setIsTransitioning(true);
+    // Brief fade out
+    setTimeout(() => {
+      setSelectedTerm(null);
+      if (typeof window !== "undefined") {
+        // Go back to homepage
+        window.history.pushState({}, "", "/");
+      }
+      // Fade back in
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 50);
+    }, 150);
   };
 
   const handleSearchFromModal = (searchTerm: string) => {
     setSearchQuery(searchTerm);
     if (typeof window !== "undefined") {
       if (searchTerm) {
-        window.history.pushState({}, "", `/?search=${encodeURIComponent(searchTerm)}`);
+        window.history.pushState(
+          {},
+          "",
+          `/?search=${encodeURIComponent(searchTerm)}`
+        );
       } else {
         window.history.pushState({}, "", "/");
       }
@@ -146,27 +163,28 @@ export default function HomePage() {
   useEffect(() => {
     const handlePopState = () => {
       if (typeof window !== "undefined") {
-        const urlParams = new URLSearchParams(window.location.search);
-        const searchParam = urlParams.get("search");
-        const path = window.location.pathname;
-        
-        // Handle term pages
-        if (path !== "/" && path !== "") {
-          const slug = path.replace("/", "");
-          const term = termsData.find(
-            t => t.term.toLowerCase().replace(/\s+/g, "-") === slug
-          );
-          setSelectedTerm(term || null);
-        } else {
+        setIsTransitioning(true);
+        // Brief fade out
+        setTimeout(() => {
+          const urlParams = new URLSearchParams(window.location.search);
+          const searchParam = urlParams.get("search");
+
+          // Term pages are now handled by [slug]/page.tsx
+          // Homepage only handles search and modal state
           setSelectedTerm(null);
-        }
-        
-        // Handle search
-        if (searchParam) {
-          setSearchQuery(searchParam);
-        } else if (path === "/" || path === "") {
-          setSearchQuery("");
-        }
+
+          // Handle search
+          if (searchParam) {
+            setSearchQuery(searchParam);
+          } else {
+            setSearchQuery("");
+          }
+          
+          // Fade back in
+          setTimeout(() => {
+            setIsTransitioning(false);
+          }, 50);
+        }, 150);
       }
     };
 
@@ -188,8 +206,9 @@ export default function HomePage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+
   return (
-    <div className="min-h-screen w-full bg-neutral-950 text-neutral-200 pb-10 overflow-x-hidden">
+    <div className={`min-h-screen w-full bg-neutral-950 text-neutral-200 pb-10 overflow-x-hidden transition-opacity duration-150 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
       {/* Background gradients */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div
@@ -234,7 +253,10 @@ export default function HomePage() {
       </div>
 
       {/* Controls */}
-      <div ref={filtersPlaceholderRef} className={`relative z-10 ${selectedTerm ? 'hidden' : ''}`}>
+      <div
+        ref={filtersPlaceholderRef}
+        className={`relative z-10 ${selectedTerm ? "hidden" : ""}`}
+      >
         <div className="container mx-auto max-w-6xl px-5">
           <div className="p-6 pt-0 relative">
             <div className="flex flex-col gap-4 w-full">
@@ -253,7 +275,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Primary Filters */}
-                <div className="flex flex-wrap gap-2 justify-center items-center">
+                <div className="flex flex-wrap gap-1 justify-center items-center">
                   {[
                     { value: "all" as const, label: "All" },
                     { value: "positive" as const, label: "Positive" },
@@ -275,7 +297,10 @@ export default function HomePage() {
 
               {/* Second row: Subcategory Filters */}
               <div className="relative w-full">
-                <div ref={subcategoryScrollRef} className="flex gap-1 sm:gap-2 overflow-x-auto sm:overflow-x-visible scrollbar-hide items-center px-8 sm:px-0 sm:justify-center sm:flex-wrap">
+                <div
+                  ref={subcategoryScrollRef}
+                  className="flex gap-1 sm:gap-2 overflow-x-auto sm:overflow-x-visible scrollbar-hide items-center px-8 sm:px-0 sm:justify-center sm:flex-wrap"
+                >
                   {allSubcategories.map((category) => (
                     <FilterButton
                       key={category}
@@ -289,14 +314,14 @@ export default function HomePage() {
                   ))}
                 </div>
                 {/* Scroll indicators for very small screens only */}
-                <button 
-                  onClick={() => scrollSubcategories('left', false)}
+                <button
+                  onClick={() => scrollSubcategories("left", false)}
                   className="absolute left-0 top-1/2 -translate-y-1/2 w-6 h-6 bg-neutral-800/80 backdrop-blur-sm border border-neutral-700 rounded-full flex items-center justify-center sm:hidden hover:bg-neutral-700/80 transition-colors duration-200"
                 >
                   <i className="fas fa-chevron-left text-neutral-400 text-xs"></i>
                 </button>
-                <button 
-                  onClick={() => scrollSubcategories('right', false)}
+                <button
+                  onClick={() => scrollSubcategories("right", false)}
                   className="absolute right-0 top-1/2 -translate-y-1/2 w-6 h-6 bg-neutral-800/80 backdrop-blur-sm border border-neutral-700 rounded-full flex items-center justify-center sm:hidden hover:bg-neutral-700/80 transition-colors duration-200"
                 >
                   <i className="fas fa-chevron-right text-neutral-400 text-xs"></i>
@@ -310,7 +335,9 @@ export default function HomePage() {
       {/* Sticky Controls - slides up from bottom when original is out of view */}
       <div
         className={`fixed top-0 left-1/2 transform -translate-x-1/2 bg-neutral-950/80 backdrop-blur-md border border-neutral-800/40 rounded-lg z-50 shadow-lg transition-transform duration-300 ease-out ${
-          isFiltersSticky && !selectedTerm ? "translate-y-0" : "translate-y-[-100%]"
+          isFiltersSticky && !selectedTerm
+            ? "translate-y-0"
+            : "translate-y-[-100%]"
         }`}
         style={{ width: "calc(100% - 40px)", maxWidth: "1152px" }}
       >
@@ -353,7 +380,10 @@ export default function HomePage() {
 
             {/* Second row: Subcategory Filters */}
             <div className="relative w-full">
-              <div ref={stickySubcategoryScrollRef} className="flex gap-1 sm:gap-2 overflow-x-auto sm:overflow-x-visible scrollbar-hide items-center px-8 sm:px-0 sm:justify-center sm:flex-wrap">
+              <div
+                ref={stickySubcategoryScrollRef}
+                className="flex gap-1 sm:gap-2 overflow-x-auto sm:overflow-x-visible scrollbar-hide items-center px-8 sm:px-0 sm:justify-center sm:flex-wrap"
+              >
                 {allSubcategories.map((category) => (
                   <FilterButton
                     key={category}
@@ -367,14 +397,14 @@ export default function HomePage() {
                 ))}
               </div>
               {/* Scroll indicators for very small screens only */}
-              <button 
-                onClick={() => scrollSubcategories('left', true)}
+              <button
+                onClick={() => scrollSubcategories("left", true)}
                 className="absolute left-0 top-1/2 -translate-y-1/2 w-6 h-6 bg-neutral-800/90 backdrop-blur-sm border border-neutral-600 rounded-full flex items-center justify-center sm:hidden hover:bg-neutral-700/90 transition-colors duration-200"
               >
                 <i className="fas fa-chevron-left text-neutral-300 text-xs"></i>
               </button>
-              <button 
-                onClick={() => scrollSubcategories('right', true)}
+              <button
+                onClick={() => scrollSubcategories("right", true)}
                 className="absolute right-0 top-1/2 -translate-y-1/2 w-6 h-6 bg-neutral-800/90 backdrop-blur-sm border border-neutral-600 rounded-full flex items-center justify-center sm:hidden hover:bg-neutral-700/90 transition-colors duration-200"
               >
                 <i className="fas fa-chevron-right text-neutral-300 text-xs"></i>
