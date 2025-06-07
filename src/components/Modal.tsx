@@ -11,19 +11,6 @@ interface ModalProps {
   termsData: AudioTerm[];
 }
 
-function highlightText(
-  text: string,
-  query: string = "",
-  className: string = ""
-): string {
-  if (!query) return text;
-  const safeQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return text.replace(
-    new RegExp(safeQuery, "gi"),
-    (match) =>
-      `<mark${className ? ` class="${className}"` : ""}>${match}</mark>`
-  );
-}
 
 export function Modal({
   term,

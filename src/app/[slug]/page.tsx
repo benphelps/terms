@@ -1,6 +1,5 @@
 import { termsData } from '@/data';
 import { TermPageClient } from '@/components/TermPageClient';
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
