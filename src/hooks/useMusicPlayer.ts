@@ -52,27 +52,40 @@ export const useMusicPlayer = () => {
     
     try {
       const deezerUrl = `https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=5`;
-      const response = await fetch(
-        `https://whateverorigin.org/get?url=${encodeURIComponent(deezerUrl)}&callback=`
-      );
-
-      if (!response.ok) {
-        throw new Error(`Music API error: ${response.status}`);
-      }
-
-      const proxyData = await response.json();
-      const data = JSON.parse(proxyData.contents);
+      const proxyUrl = `https://whateverorigin.org/get?url=${encodeURIComponent(deezerUrl)}&callback=`;
       
-      if (data.data && data.data.length > 0) {
-        for (const track of data.data) {
-          if (track.preview) {
-            return track;
+      // Try twice with the CORS proxy
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          const response = await fetch(proxyUrl);
+
+          if (!response.ok) {
+            throw new Error(`Music API error: ${response.status}`);
+          }
+
+          const proxyData = await response.json();
+          const data = JSON.parse(proxyData.contents);
+          
+          if (data.data && data.data.length > 0) {
+            for (const track of data.data) {
+              if (track.preview) {
+                return track;
+              }
+            }
+          }
+
+          return null;
+        } catch (error) {
+          console.log(`Music search attempt ${attempt} failed:`, error);
+          
+          // If first attempt failed, wait a bit before retry
+          if (attempt === 1) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
           }
         }
       }
-
-      return null;
-    } catch {
+      
+      // Both attempts failed
       return null;
     } finally {
       setIsLoading(false);
