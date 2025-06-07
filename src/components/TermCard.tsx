@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "react";
+import Link from "next/link";
 import type { AudioTerm } from "../types";
 
 interface TermCardProps {
@@ -16,6 +17,10 @@ function highlightText(text: string, query: string = ""): string {
     new RegExp(safeQuery, "gi"),
     (match) => `<mark>${match}</mark>`
   );
+}
+
+function generateSlug(term: string): string {
+  return term.toLowerCase().replace(/\s+/g, '-');
 }
 
 export function TermCard({
@@ -108,6 +113,7 @@ export function TermCard({
   }, []);
 
   const sentimentClass = term.primaryCategory;
+  const termSlug = generateSlug(term.term);
 
   return (
     <div
@@ -151,12 +157,16 @@ export function TermCard({
 
         {/* Header */}
         <div className="relative flex items-center justify-between mb-3 z-10">
-          <h2
-            className="text-xl font-semibold text-neutral-200"
-            dangerouslySetInnerHTML={{
-              __html: highlightText(term.term, searchQuery),
-            }}
-          />
+          <h2 className="text-xl font-semibold text-neutral-200">
+            <Link
+              href={`/${termSlug}`}
+              className="hover:text-neutral-100 transition-colors"
+              onClick={(e) => e.stopPropagation()}
+              dangerouslySetInnerHTML={{
+                __html: highlightText(term.term, searchQuery),
+              }}
+            />
+          </h2>
           <div
             className={`
             w-2 h-2 rounded-full opacity-80
