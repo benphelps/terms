@@ -8,6 +8,8 @@ interface ModalProps {
   searchQuery?: string;
   onClose: () => void;
   onSearchTerm: (term: string) => void;
+  onOpenTerm: (term: AudioTerm) => void;
+  termsData: AudioTerm[];
 }
 
 function highlightText(
@@ -29,6 +31,8 @@ export function Modal({
   searchQuery = "",
   onClose,
   onSearchTerm,
+  onOpenTerm,
+  termsData,
 }: ModalProps) {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -53,174 +57,186 @@ export function Modal({
   };
 
   const handleRelatedTermClick = (relatedTerm: string) => {
-    onClose();
-    onSearchTerm(relatedTerm);
+    // Check if this is an actual term in our dictionary
+    const actualTerm = termsData.find(
+      (t) => t.term.toLowerCase() === relatedTerm.toLowerCase()
+    );
+
+    if (actualTerm) {
+      // If it's an actual term, open it in the modal
+      onOpenTerm(actualTerm);
+    } else {
+      // If it's not an actual term, close modal and search
+      onClose();
+      onSearchTerm(relatedTerm);
+    }
   };
 
   return (
     <div
-      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[1000] p-5 overflow-y-auto flex items-center justify-center"
+      className="fixed inset-0 bg-neutral-950 z-[1000] overflow-y-auto"
       onClick={handleBackdropClick}
     >
-      <div className="bg-neutral-800 rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-neutral-700 shadow-2xl modal-scrollbar">
-        {/* Header */}
-        <div className="sticky top-0 bg-neutral-800 p-8 border-b border-neutral-700 z-10">
+      <div className="min-h-screen w-full bg-neutral-950 text-neutral-200 modal-scrollbar">
+        {/* Background gradients - same as main page */}
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <div
+            className="absolute w-full h-full"
+            style={{
+              background:
+                "radial-gradient(circle at 20% 50%, rgba(16, 185, 129, 0.08) 0%, transparent 50%)",
+            }}
+          />
+          <div
+            className="absolute w-full h-full"
+            style={{
+              background:
+                "radial-gradient(circle at 80% 50%, rgba(251, 191, 36, 0.06) 0%, transparent 50%)",
+            }}
+          />
+          <div
+            className="absolute w-full h-full"
+            style={{
+              background:
+                "radial-gradient(circle at 50% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 50%)",
+            }}
+          />
+          <div
+            className="absolute w-full h-full"
+            style={{
+              background:
+                "radial-gradient(circle at 30% 20%, rgba(236, 72, 153, 0.04) 0%, transparent 50%)",
+            }}
+          />
+        </div>
+
+        <div className="container mx-auto max-w-6xl px-5 py-8 relative z-10">
+          {/* Close Button - positioned at top right */}
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 w-10 h-10 flex items-center justify-center rounded-full text-neutral-200 text-lg hover:bg-white/10 hover:text-white transition-all duration-300"
+            className="fixed top-8 right-8 w-12 h-12 flex items-center justify-center rounded-full bg-neutral-800/80 backdrop-blur-sm border border-neutral-700 text-neutral-200 text-xl hover:bg-neutral-700/80 hover:text-white transition-all duration-300 z-50 shadow-lg"
           >
             <i className="fas fa-times"></i>
           </button>
 
-          <h2
-            className="text-3xl font-semibold mb-4 text-neutral-200"
-            dangerouslySetInnerHTML={{
-              __html: highlightText(term.term, searchQuery, "modal-highlight"),
-            }}
-          />
-
-          <div className="flex flex-wrap gap-1.5">
-            <span
-              className={`
-              text-xs px-2.5 py-1 rounded-xl border
-              ${
-                term.primaryCategory === "positive"
-                  ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                  : term.primaryCategory === "negative"
-                  ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
-                  : "bg-neutral-500/10 text-neutral-500 border-neutral-500/20"
-              }
-            `}
-            >
-              {term.primaryCategory}
-            </span>
-            {term.subCategories.map((cat, index) => (
-              <span
-                key={index}
-                className="text-xs px-2.5 py-1 bg-white/5 border border-white/10 rounded-xl text-neutral-500"
-              >
-                {cat}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* Body */}
-        <div className="p-8 space-y-6">
-          {/* Test Tracks */}
-          {audioTermTracks[term.term as keyof typeof audioTermTracks] && (
-            <TestTracks tracks={audioTermTracks[term.term as keyof typeof audioTermTracks]} />
-          )}
-
-          {/* Top Info Bar */}
-          <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 pb-6 ${!audioTermTracks[term.term as keyof typeof audioTermTracks] ? 'border-b border-neutral-700' : ''}`}>
-            {/* Related Terms */}
-            {term.relatedTerms.length > 0 && (
-              <div>
-                <h3 className="text-sm font-medium mb-3 text-[#e0e0e0]">
-                  Related Terms
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {term.relatedTerms.map((relatedTerm, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleRelatedTermClick(relatedTerm)}
-                      className="px-2 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-500 text-xs hover:bg-emerald-500/20 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
-                    >
-                      {relatedTerm}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Opposite Terms */}
-            {term.oppositeTerms && term.oppositeTerms.length > 0 && (
-              <div>
-                <h3 className="text-sm font-medium mb-3 text-[#e0e0e0]">
-                  Opposite Terms
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {term.oppositeTerms.map((oppositeTerm, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleRelatedTermClick(oppositeTerm)}
-                      className="px-2 py-1 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-500 text-xs hover:bg-amber-500/20 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
-                    >
-                      {oppositeTerm}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Technical Range */}
-            <div>
-              <h3 className="text-sm font-medium mb-3 text-neutral-200">
-                Technical Range
-              </h3>
-              <p
-                className="text-neutral-400 text-sm"
+          {/* Term Header */}
+          <div className="mb-6">
+            <div className="flex items-center gap-4 mb-4">
+              <h1 
+                className="text-4xl font-bold text-neutral-200"
                 dangerouslySetInnerHTML={{
-                  __html: highlightText(
-                    term.technicalRange,
-                    searchQuery,
-                    "modal-highlight"
-                  ),
+                  __html: highlightText(term.term, searchQuery, "modal-highlight"),
                 }}
               />
+              <div
+                className={`
+                w-3 h-3 rounded-full
+                ${
+                  term.primaryCategory === "positive"
+                    ? "bg-emerald-500 shadow-lg shadow-emerald-500/50"
+                    : term.primaryCategory === "negative"
+                    ? "bg-amber-500 shadow-lg shadow-amber-500/50"
+                    : "bg-neutral-500 shadow-lg shadow-neutral-300/50"
+                }
+              `}
+              />
             </div>
-          </div>
 
-          {/* Text Sections */}
-          <div>
-            <h3 className="text-lg font-medium mb-4 text-neutral-200 flex items-center gap-2.5">
-              Summary
-            </h3>
-            <p
-              className="text-neutral-400 leading-relaxed"
+            <div className="flex flex-wrap gap-2 mb-4">
+              {term.subCategories.map((subcategory) => (
+                <span
+                  key={subcategory}
+                  className="px-2 py-1 border-2 rounded-2xl text-xs font-medium whitespace-nowrap min-h-6 flex items-center bg-neutral-900 border-neutral-800 text-neutral-400"
+                >
+                  {subcategory}
+                </span>
+              ))}
+            </div>
+
+            <p 
+              className="text-lg text-neutral-300 leading-relaxed mb-4"
               dangerouslySetInnerHTML={{
-                __html: highlightText(
-                  term.summary,
-                  searchQuery,
-                  "modal-highlight"
-                ),
+                __html: highlightText(term.summary, searchQuery, "modal-highlight"),
               }}
             />
           </div>
 
-          <div>
-            <h3 className="text-lg font-medium mb-4 text-neutral-200 flex items-center gap-2.5">
-              Short Explanation
-            </h3>
-            <p
-              className="text-neutral-400 leading-relaxed"
-              dangerouslySetInnerHTML={{
-                __html: highlightText(
-                  term.shortExplanation,
-                  searchQuery,
-                  "modal-highlight"
-                ),
-              }}
+          {/* Related Terms */}
+          {(term.relatedTerms.length > 0 ||
+            (term.oppositeTerms && term.oppositeTerms.length > 0)) && (
+            <div className="mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {term.relatedTerms.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium text-neutral-400 mb-3">
+                      Similar Concepts
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {term.relatedTerms.map((relatedTerm) => (
+                        <button
+                          key={relatedTerm}
+                          onClick={() => handleRelatedTermClick(relatedTerm)}
+                          className="px-2 py-1 border-2 rounded-2xl text-xs font-medium whitespace-nowrap min-h-6 flex items-center transition-all duration-300 cursor-pointer bg-neutral-900 border-emerald-500/30 text-emerald-500/70 hover:border-emerald-500 hover:text-emerald-500"
+                        >
+                          {relatedTerm}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {term.oppositeTerms && term.oppositeTerms.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-medium text-neutral-400 mb-3">
+                      Opposite Concepts
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {term.oppositeTerms.map((oppositeTerm) => (
+                        <button
+                          key={oppositeTerm}
+                          onClick={() => handleRelatedTermClick(oppositeTerm)}
+                          className="px-2 py-1 border-2 rounded-2xl text-xs font-medium whitespace-nowrap min-h-6 flex items-center transition-all duration-300 cursor-pointer bg-neutral-900 border-amber-500/30 text-amber-500/70 hover:border-amber-500 hover:text-amber-500"
+                        >
+                          {oppositeTerm}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Test Tracks */}
+          {audioTermTracks[term.term as keyof typeof audioTermTracks] && (
+            <div className="mb-8">
+              <TestTracks
+                tracks={audioTermTracks[term.term as keyof typeof audioTermTracks]}
+              />
+            </div>
+          )}
+
+          {/* Short Explanation */}
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-4 text-neutral-200">
+              Quick Overview
+            </h2>
+            <div
+              className="text-neutral-300 leading-relaxed prose prose-invert max-w-none"
+              dangerouslySetInnerHTML={{ __html: highlightText(term.shortExplanation, searchQuery, "modal-highlight") }}
             />
           </div>
 
-          <div>
-            <h3 className="text-lg font-medium mb-4 text-[#e0e0e0] flex items-center gap-2.5">
-              Detailed Description
-            </h3>
-            <p
-              className="text-[#a0a0a0] leading-relaxed"
-              dangerouslySetInnerHTML={{
-                __html: highlightText(
-                  term.detailedDescription,
-                  searchQuery,
-                  "modal-highlight"
-                ),
-              }}
+          {/* Detailed Description */}
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-4 text-neutral-200">
+              In Detail
+            </h2>
+            <div
+              className="text-neutral-300 leading-relaxed prose prose-invert max-w-none"
+              dangerouslySetInnerHTML={{ __html: highlightText(term.detailedDescription, searchQuery, "modal-highlight") }}
             />
           </div>
-
         </div>
       </div>
     </div>

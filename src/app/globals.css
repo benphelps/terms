@@ -66,7 +66,7 @@ body {
 /* Desktop content max-width for better readability */
 @media screen and (min-width: 1600px) {
   .container {
-    max-width: 1600px !important;
+    max-width: 1152px !important;
   }
 }
 
@@ -267,7 +267,7 @@ mark.modal-highlight {
 
 /* Chart styles */
 .term-point {
-  transition: all 0.1s ease;
+  transition: all 0.3s ease;
 }
 
 .term-point:hover {
@@ -279,7 +279,7 @@ mark.modal-highlight {
   pointer-events: none;
   font-family: inherit;
   opacity: 0.8;
-  transition: opacity 0.1s ease;
+  transition: opacity 0.3s ease;
 }
 
 .term-point.dimmed {

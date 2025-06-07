@@ -5,6 +5,7 @@ import { SearchBox } from "@/components/SearchBox";
 import { FilterButton } from "@/components/FilterButton";
 import { TermCard } from "@/components/TermCard";
 import { FrequencyChart } from "@/components/FrequencyChart";
+import { Modal } from "@/components/Modal";
 import { useSearch } from "@/hooks/useSearch";
 import { useFilters } from "@/hooks/useFilters";
 import { termsData } from "@/data";
@@ -13,6 +14,7 @@ import type { AudioTerm } from "@/types";
 export default function HomePage() {
   const [expandedTermId, setExpandedTermId] = useState<string | null>(null);
   const [isFiltersSticky, setIsFiltersSticky] = useState(false);
+  const [selectedTerm, setSelectedTerm] = useState<AudioTerm | null>(null);
   const filtersPlaceholderRef = useRef<HTMLDivElement>(null);
   const subcategoryScrollRef = useRef<HTMLDivElement>(null);
   const stickySubcategoryScrollRef = useRef<HTMLDivElement>(null);
@@ -36,15 +38,26 @@ export default function HomePage() {
   const { searchQuery, setSearchQuery, searchResults, hasSearchQuery } =
     useSearch(termsData);
 
-  // Check for search parameter in URL
+  // Check for search parameter and term slug in URL
   useEffect(() => {
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
       const searchParam = urlParams.get("search");
+      const path = window.location.pathname;
+      
       if (searchParam) {
         setSearchQuery(searchParam);
-        // Clear the URL parameter after setting the search
-        window.history.replaceState({}, "", "/");
+      }
+      
+      // Check if we're on a term page (any path that's not just "/")
+      if (path !== "/" && path !== "") {
+        const slug = path.replace("/", "");
+        const term = termsData.find(
+          t => t.term.toLowerCase().replace(/\s+/g, "-") === slug
+        );
+        if (term) {
+          setSelectedTerm(term);
+        }
       }
     }
   }, [setSearchQuery]);
@@ -98,15 +111,68 @@ export default function HomePage() {
   };
 
   const handleOpenTerm = (term: AudioTerm) => {
+    setSelectedTerm(term);
     const slug = term.term.toLowerCase().replace(/\s+/g, "-");
     if (typeof window !== "undefined") {
-      window.location.href = `/${slug}`;
+      // Update URL to clean path
+      window.history.pushState({}, "", `/${slug}`);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setSelectedTerm(null);
+    if (typeof window !== "undefined") {
+      // Go back to homepage
+      window.history.pushState({}, "", "/");
+    }
+  };
+
+  const handleSearchFromModal = (searchTerm: string) => {
+    setSearchQuery(searchTerm);
+    if (typeof window !== "undefined") {
+      if (searchTerm) {
+        window.history.pushState({}, "", `/?search=${encodeURIComponent(searchTerm)}`);
+      } else {
+        window.history.pushState({}, "", "/");
+      }
     }
   };
 
   const handleCardExpand = (termId: string) => {
     setExpandedTermId(expandedTermId === termId ? null : termId);
   };
+
+  // Handle browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      if (typeof window !== "undefined") {
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchParam = urlParams.get("search");
+        const path = window.location.pathname;
+        
+        // Handle term pages
+        if (path !== "/" && path !== "") {
+          const slug = path.replace("/", "");
+          const term = termsData.find(
+            t => t.term.toLowerCase().replace(/\s+/g, "-") === slug
+          );
+          setSelectedTerm(term || null);
+        } else {
+          setSelectedTerm(null);
+        }
+        
+        // Handle search
+        if (searchParam) {
+          setSearchQuery(searchParam);
+        } else if (path === "/" || path === "") {
+          setSearchQuery("");
+        }
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [setSearchQuery]);
 
   // Sticky filters logic
   useEffect(() => {
@@ -156,7 +222,7 @@ export default function HomePage() {
         />
       </div>
 
-      <div className="container mx-auto max-w-[1400px] px-5 pt-8 relative z-10">
+      <div className="container mx-auto max-w-6xl px-5 pt-8 relative z-10">
         <header className="text-center mb-8">
           <h1 className="text-5xl font-bold pb-2.5 bg-gradient-to-br from-emerald-500 to-amber-500 bg-clip-text text-transparent">
             Audiophile Terminology Guide
@@ -168,8 +234,8 @@ export default function HomePage() {
       </div>
 
       {/* Controls */}
-      <div ref={filtersPlaceholderRef} className="relative z-10">
-        <div className="container mx-auto max-w-[1400px] px-5">
+      <div ref={filtersPlaceholderRef} className={`relative z-10 ${selectedTerm ? 'hidden' : ''}`}>
+        <div className="container mx-auto max-w-6xl px-5">
           <div className="p-6 pt-0 relative">
             <div className="flex flex-col gap-4 w-full">
               {/* First row: Search + Clear + Sentiment */}
@@ -244,9 +310,9 @@ export default function HomePage() {
       {/* Sticky Controls - slides up from bottom when original is out of view */}
       <div
         className={`fixed top-0 left-1/2 transform -translate-x-1/2 bg-neutral-950/80 backdrop-blur-md border border-neutral-800/40 rounded-lg z-50 shadow-lg transition-transform duration-300 ease-out ${
-          isFiltersSticky ? "translate-y-0" : "translate-y-[-100%]"
+          isFiltersSticky && !selectedTerm ? "translate-y-0" : "translate-y-[-100%]"
         }`}
-        style={{ width: "calc(100% - 40px)", maxWidth: "1400px" }}
+        style={{ width: "calc(100% - 40px)", maxWidth: "1152px" }}
       >
         <div className="p-6">
           <div className="flex flex-col gap-4 w-full">
@@ -318,7 +384,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="container mx-auto max-w-[1400px] px-5 relative z-10">
+      <div className="container mx-auto max-w-6xl px-5 relative z-10">
         {/* Frequency Chart */}
         <FrequencyChart
           terms={displayTerms}
@@ -357,6 +423,16 @@ export default function HomePage() {
             )}
           </div>
         )}
+
+        {/* Modal */}
+        <Modal
+          term={selectedTerm}
+          searchQuery={searchQuery}
+          onClose={handleCloseModal}
+          onSearchTerm={handleSearchFromModal}
+          onOpenTerm={handleOpenTerm}
+          termsData={termsData}
+        />
       </div>
     </div>
   );

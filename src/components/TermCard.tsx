@@ -27,6 +27,7 @@ export function TermCard({
 }: TermCardProps) {
   const expandedTextRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleClick = () => {
     // On desktop, if card is already expanded (hover or click), go directly to term page
@@ -47,13 +48,27 @@ export function TermCard({
   const handleMouseEnter = () => {
     // Only expand on hover for desktop (non-touch devices)
     if (!("ontouchstart" in window)) {
-      setIsHovered(true);
+      // Clear any existing timeout
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+      
+      // Add delay before expanding
+      hoverTimeoutRef.current = setTimeout(() => {
+        setIsHovered(true);
+      }, 300); // 300ms delay
     }
   };
 
   const handleMouseLeave = () => {
     // Only collapse on hover leave for desktop
     if (typeof window !== 'undefined' && !("ontouchstart" in window)) {
+      // Clear the timeout if user leaves before expansion
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+        hoverTimeoutRef.current = null;
+      }
+      
       setIsHovered(false);
     }
   };
@@ -82,6 +97,15 @@ export function TermCard({
       };
     }
   }, [shouldExpand]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const sentimentClass = term.primaryCategory;
 
