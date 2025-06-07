@@ -108,7 +108,7 @@ export default async function TermPage({ params }: TermPageProps) {
         {/* Back to Home Link */}
         <Link
           href="/"
-          className="fixed top-8 left-8 flex items-center gap-2 px-4 py-2 rounded-full bg-neutral-800/80 backdrop-blur-sm border border-neutral-700 text-neutral-200 hover:bg-neutral-700/80 hover:text-white transition-all duration-300 z-50 shadow-lg"
+          className="fixed top-8 left-8 sm:left-8 sm:right-auto right-8 flex items-center gap-2 px-4 py-2 rounded-full bg-neutral-800/80 backdrop-blur-sm border border-neutral-700 text-neutral-200 hover:bg-neutral-700/80 hover:text-white transition-all duration-300 z-50 shadow-lg"
         >
           <i className="fas fa-arrow-left"></i>
           <span className="hidden sm:inline">Back to Home</span>

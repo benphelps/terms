@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Volume, Volume1, Volume2, VolumeX } from "lucide-react";
 import { TrackRow } from "./TrackRow";
 
@@ -53,7 +53,7 @@ export function TestTracks({ tracks }: TestTracksProps) {
     }
   };
 
-  const updateVolume = (newVolume: number) => {
+  const updateVolume = useCallback((newVolume: number) => {
     const clampedVolume = Math.max(0, Math.min(1, newVolume));
     setVolume(clampedVolume);
     
@@ -65,13 +65,16 @@ export function TestTracks({ tracks }: TestTracksProps) {
     }
     
     // Update global audio volume if audio is playing
-    if (typeof window !== 'undefined' && (window as any).getGlobalAudioState) {
-      const audioState = (window as any).getGlobalAudioState();
-      if (audioState?.audio) {
-        audioState.audio.volume = clampedVolume;
+    if (typeof window !== 'undefined') {
+      const globalWindow = window as typeof window & { getGlobalAudioState?: () => { audio: HTMLAudioElement } | null };
+      if (globalWindow.getGlobalAudioState) {
+        const audioState = globalWindow.getGlobalAudioState();
+        if (audioState?.audio) {
+          audioState.audio.volume = clampedVolume;
+        }
       }
     }
-  };
+  }, [isMuted]);
 
   const getVolumeIcon = () => {
     if (isMuted || volume === 0) return <VolumeX className="w-4 h-4" />;
@@ -99,7 +102,7 @@ export function TestTracks({ tracks }: TestTracksProps) {
     return () => {
       document.removeEventListener('wheel', handleWheel);
     };
-  }, [volume]);
+  }, [volume, updateVolume]);
 
   if (tracks.length === 0) return null;
 

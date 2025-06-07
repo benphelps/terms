@@ -20,7 +20,8 @@ const progressCallbacks: Set<(query: string, progress: number, duration: number)
 
 // Expose global audio state to window for volume control
 if (typeof window !== 'undefined') {
-  (window as any).getGlobalAudioState = () => globalAudioState;
+  const globalWindow = window as typeof window & { getGlobalAudioState?: () => AudioState | null };
+  globalWindow.getGlobalAudioState = () => globalAudioState;
 }
 
 export const useMusicPlayer = () => {
