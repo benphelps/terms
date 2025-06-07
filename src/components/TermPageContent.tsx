@@ -97,15 +97,15 @@ export function TermPageContent({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {term.relatedTerms.length > 0 && (
               <div>
-                <h3 className="text-sm font-medium text-neutral-400 mb-3">
+                <h2 className="text-sm font-medium text-neutral-400 mb-3">
                   Similar Concepts
-                </h3>
+                </h2>
                 <div className="flex flex-wrap gap-2">
                   {term.relatedTerms.map((relatedTerm) => (
                     <button
                       key={relatedTerm}
                       onClick={() => handleRelatedTermClick(relatedTerm)}
-                      className="px-2 py-1 border-2 rounded-2xl text-xs font-medium whitespace-nowrap min-h-6 flex items-center transition-all duration-300 cursor-pointer bg-neutral-900 border-emerald-500/30 text-emerald-500/70 hover:border-emerald-500 hover:text-emerald-500"
+                      className="px-2 py-1 border-2 rounded-2xl text-xs font-medium whitespace-nowrap min-h-6 flex items-center transition-all duration-300 cursor-pointer bg-neutral-900 border-emerald-500/30 text-emerald-400 hover:border-emerald-500 hover:text-emerald-500"
                     >
                       {relatedTerm}
                     </button>
@@ -116,15 +116,15 @@ export function TermPageContent({
 
             {term.oppositeTerms && term.oppositeTerms.length > 0 && (
               <div>
-                <h3 className="text-sm font-medium text-neutral-400 mb-3">
+                <h2 className="text-sm font-medium text-neutral-400 mb-3">
                   Opposite Concepts
-                </h3>
+                </h2>
                 <div className="flex flex-wrap gap-2">
                   {term.oppositeTerms.map((oppositeTerm) => (
                     <button
                       key={oppositeTerm}
                       onClick={() => handleRelatedTermClick(oppositeTerm)}
-                      className="px-2 py-1 border-2 rounded-2xl text-xs font-medium whitespace-nowrap min-h-6 flex items-center transition-all duration-300 cursor-pointer bg-neutral-900 border-amber-500/30 text-amber-500/70 hover:border-amber-500 hover:text-amber-500"
+                      className="px-2 py-1 border-2 rounded-2xl text-xs font-medium whitespace-nowrap min-h-6 flex items-center transition-all duration-300 cursor-pointer bg-neutral-900 border-amber-500/30 text-amber-400 hover:border-amber-500 hover:text-amber-500"
                     >
                       {oppositeTerm}
                     </button>
@@ -147,9 +147,9 @@ export function TermPageContent({
 
       {/* Short Explanation */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4 text-neutral-200">
+        <h3 className="text-xl font-semibold mb-4 text-neutral-200">
           Quick Overview
-        </h2>
+        </h3>
         <div
           className="text-neutral-300 leading-relaxed prose prose-invert max-w-none"
           dangerouslySetInnerHTML={{ __html: highlightText(term.shortExplanation, searchQuery, "modal-highlight") }}
@@ -158,9 +158,9 @@ export function TermPageContent({
 
       {/* Detailed Description */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4 text-neutral-200">
+        <h3 className="text-xl font-semibold mb-4 text-neutral-200">
           In Detail
-        </h2>
+        </h3>
         <div
           className="text-neutral-300 leading-relaxed prose prose-invert max-w-none"
           dangerouslySetInnerHTML={{ __html: highlightText(term.detailedDescription, searchQuery, "modal-highlight") }}

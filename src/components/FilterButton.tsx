@@ -17,13 +17,13 @@ export function FilterButton({
 }: FilterButtonProps) {
   const getFilterColors = () => {
     if (filter === "all")
-      return "border-blue-400/30 text-blue-400/70 hover:border-blue-400 hover:text-blue-400";
+      return "border-blue-400/30 text-blue-400 hover:border-blue-400 hover:text-blue-400";
     if (filter === "positive")
-      return "border-emerald-500/30 text-emerald-500/70 hover:border-emerald-500 hover:text-emerald-500";
+      return "border-emerald-500/30 text-emerald-400 hover:border-emerald-500 hover:text-emerald-500";
     if (filter === "negative")
-      return "border-amber-500/30 text-amber-500/70 hover:border-amber-500 hover:text-amber-500";
+      return "border-amber-500/30 text-amber-400 hover:border-amber-500 hover:text-amber-500";
     if (filter === "neutral")
-      return "border-neutral-500/30 text-neutral-500/70 hover:border-neutral-500 hover:text-neutral-500";
+      return "border-neutral-500/30 text-neutral-400 hover:border-neutral-500 hover:text-neutral-500";
     return "border-neutral-800 text-neutral-400 hover:border-blue-400 hover:text-blue-400";
   };
 
