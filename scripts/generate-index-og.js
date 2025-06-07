@@ -49,37 +49,45 @@ async function generateIndexOG() {
     ctx.fillStyle = gradient4;
     ctx.fillRect(0, 0, 1200, 630);
 
-    // Top section with site branding
-    ctx.fillStyle = '#e5e7eb'; // neutral-200
-    ctx.font = 'bold 42px Arial, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('Audiophile Terminology Guide', 60, 100);
-
-    // Site URL
+    // Small title at top
     ctx.fillStyle = '#9ca3af'; // neutral-400
     ctx.font = '28px Arial, sans-serif';
-    ctx.fillText('audiowords.net', 60, 140);
+    ctx.textAlign = 'left';
+    ctx.fillText('Interactive reference for audio enthusiasts', 60, 100);
 
-    // Main title (left aligned)
+    // Site URL
+    ctx.fillStyle = '#6b7280'; // neutral-500 (slightly dimmer)
+    ctx.font = '24px Arial, sans-serif';
+    ctx.fillText('audiowords.net', 60, 135);
+
+    // Main title (large, left aligned)
     const titleGradient = ctx.createLinearGradient(0, 0, 1200, 0);
     titleGradient.addColorStop(0, '#10b981'); // emerald-500
     titleGradient.addColorStop(1, '#fbbf24'); // amber-500
     
     ctx.fillStyle = titleGradient;
     ctx.textAlign = 'left';
-    ctx.font = 'bold 110px Arial, sans-serif';
-    ctx.fillText('Audio Terms', 55, 310);
+    
+    // Check if title fits, adjust font size if needed
+    let titleFontSize = 110;
+    ctx.font = `bold ${titleFontSize}px Arial, sans-serif`;
+    while (ctx.measureText('Audiophile Terminology Guide').width > 1090 && titleFontSize > 70) {
+      titleFontSize -= 5;
+      ctx.font = `bold ${titleFontSize}px Arial, sans-serif`;
+    }
+    
+    ctx.fillText('Audiophile Terminology Guide', 55, 280);
 
-    // Summary text (left aligned)
+    // New compelling summary text (left aligned)
     ctx.fillStyle = '#d1d5db'; // neutral-300
     ctx.font = '34px Arial, sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText('Interactive reference guide for audiophile terminology.', 60, 370);
-    ctx.fillText('Explore audio terms with sentiment analysis and frequency charts.', 60, 420);
+    ctx.fillText('Decode the language of sound. From "warm" to "analytical",', 60, 340);
+    ctx.fillText('master every term that defines exceptional audio.', 60, 385);
 
     // Sample category tags (bottom section) - representing the main categories
     const sampleTags = ['Bass & Treble', 'Detail & Texture', 'Spatial & Imaging', 'Dynamics & Speed'];
-    const tagsY = 480;
+    const tagsY = 450;
     const tagHeight = 36;
     const tagPadding = 16;
     const tagSpacing = 15;
