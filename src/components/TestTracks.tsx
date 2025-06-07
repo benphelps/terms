@@ -29,7 +29,7 @@ export function TestTracks({ tracks }: TestTracksProps) {
     <div>
       {/* Header with Pagination */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium text-neutral-200">Test Tracks</h3>
+        <h2 className="text-lg font-medium text-neutral-200">Test Tracks</h2>
 
         {totalPages > 1 && (
           <div className="flex items-center gap-2">
@@ -41,7 +41,7 @@ export function TestTracks({ tracks }: TestTracksProps) {
               <ChevronLeft className="w-4 h-4" />
             </button>
 
-            <span className="text-xs text-neutral-500 min-w-[3rem] text-center">
+            <span className="text-xs text-neutral-400 min-w-[3rem] text-center">
               {currentPage + 1} / {totalPages}
             </span>
 

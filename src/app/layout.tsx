@@ -44,11 +44,8 @@ export default function RootLayout({
         <meta name="theme-color" content="#0a0a0a" />
         <meta name="msapplication-navbutton-color" content="#0a0a0a" />
         <meta name="apple-mobile-web-app-title" content="Audiophile Terms" />
-        <link rel="icon" href="/favicon.ico" sizes="32x32" />
-        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-        <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
-        <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+        <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+        <link rel="apple-touch-icon" href="/icon.svg" />
       </head>
       <body className="antialiased">
         {children}

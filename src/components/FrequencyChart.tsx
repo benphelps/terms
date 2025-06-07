@@ -723,7 +723,7 @@ export function FrequencyChart({
         />
       </div>
 
-      <p className="text-neutral-500 text-center mt-4 text-xs max-w-5xl mx-auto leading-relaxed opacity-80">
+      <p className="text-neutral-400 text-center mt-4 text-xs max-w-5xl mx-auto leading-relaxed">
         This interactive chart plots audiophile terms by their primary frequency
         relevance (X-axis) and sentiment polarity (Y-axis). Circle size
         indicates relevance strength. Click any point to view detailed term
