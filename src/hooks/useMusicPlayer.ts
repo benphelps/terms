@@ -18,6 +18,11 @@ interface AudioState {
 let globalAudioState: AudioState | null = null;
 const progressCallbacks: Set<(query: string, progress: number, duration: number) => void> = new Set();
 
+// Expose global audio state to window for volume control
+if (typeof window !== 'undefined') {
+  (window as any).getGlobalAudioState = () => globalAudioState;
+}
+
 export const useMusicPlayer = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentTrack, setCurrentTrack] = useState<string | null>(null);
