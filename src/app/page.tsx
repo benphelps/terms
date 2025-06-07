@@ -14,6 +14,24 @@ export default function HomePage() {
   const [expandedTermId, setExpandedTermId] = useState<string | null>(null);
   const [isFiltersSticky, setIsFiltersSticky] = useState(false);
   const filtersPlaceholderRef = useRef<HTMLDivElement>(null);
+  const subcategoryScrollRef = useRef<HTMLDivElement>(null);
+  const stickySubcategoryScrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollSubcategories = (direction: 'left' | 'right', isSticky = false) => {
+    const scrollContainer = isSticky ? stickySubcategoryScrollRef.current : subcategoryScrollRef.current;
+    if (!scrollContainer) return;
+
+    const scrollAmount = 200; // pixels to scroll
+    const currentScroll = scrollContainer.scrollLeft;
+    const targetScroll = direction === 'left' 
+      ? Math.max(0, currentScroll - scrollAmount)
+      : currentScroll + scrollAmount;
+
+    scrollContainer.scrollTo({
+      left: targetScroll,
+      behavior: 'smooth'
+    });
+  };
 
   const { searchQuery, setSearchQuery, searchResults, hasSearchQuery } =
     useSearch(termsData);
@@ -105,7 +123,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full bg-neutral-950 text-neutral-200 pb-10">
+    <div className="min-h-screen w-full bg-neutral-950 text-neutral-200 pb-10 overflow-x-hidden">
       {/* Background gradients */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div
@@ -191,7 +209,7 @@ export default function HomePage() {
 
               {/* Second row: Subcategory Filters */}
               <div className="relative w-full">
-                <div className="flex gap-1 sm:gap-2 overflow-x-auto sm:overflow-x-visible scrollbar-hide items-center px-8 sm:px-0 sm:justify-center sm:flex-wrap">
+                <div ref={subcategoryScrollRef} className="flex gap-1 sm:gap-2 overflow-x-auto sm:overflow-x-visible scrollbar-hide items-center px-8 sm:px-0 sm:justify-center sm:flex-wrap">
                   {allSubcategories.map((category) => (
                     <FilterButton
                       key={category}
@@ -204,9 +222,19 @@ export default function HomePage() {
                     </FilterButton>
                   ))}
                 </div>
-                {/* Fade gradients for very small screens only */}
-                <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-neutral-950 to-transparent pointer-events-none sm:hidden"></div>
-                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-neutral-950 to-transparent pointer-events-none sm:hidden"></div>
+                {/* Scroll indicators for very small screens only */}
+                <button 
+                  onClick={() => scrollSubcategories('left', false)}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-6 h-6 bg-neutral-800/80 backdrop-blur-sm border border-neutral-700 rounded-full flex items-center justify-center sm:hidden hover:bg-neutral-700/80 transition-colors duration-200"
+                >
+                  <i className="fas fa-chevron-left text-neutral-400 text-xs"></i>
+                </button>
+                <button 
+                  onClick={() => scrollSubcategories('right', false)}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 w-6 h-6 bg-neutral-800/80 backdrop-blur-sm border border-neutral-700 rounded-full flex items-center justify-center sm:hidden hover:bg-neutral-700/80 transition-colors duration-200"
+                >
+                  <i className="fas fa-chevron-right text-neutral-400 text-xs"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -259,7 +287,7 @@ export default function HomePage() {
 
             {/* Second row: Subcategory Filters */}
             <div className="relative w-full">
-              <div className="flex gap-1 sm:gap-2 overflow-x-auto sm:overflow-x-visible scrollbar-hide items-center px-8 sm:px-0 sm:justify-center sm:flex-wrap">
+              <div ref={stickySubcategoryScrollRef} className="flex gap-1 sm:gap-2 overflow-x-auto sm:overflow-x-visible scrollbar-hide items-center px-8 sm:px-0 sm:justify-center sm:flex-wrap">
                 {allSubcategories.map((category) => (
                   <FilterButton
                     key={category}
@@ -272,9 +300,19 @@ export default function HomePage() {
                   </FilterButton>
                 ))}
               </div>
-              {/* Fade gradients for very small screens only */}
-              <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-neutral-950/80 to-transparent pointer-events-none sm:hidden"></div>
-              <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-neutral-950/80 to-transparent pointer-events-none sm:hidden"></div>
+              {/* Scroll indicators for very small screens only */}
+              <button 
+                onClick={() => scrollSubcategories('left', true)}
+                className="absolute left-0 top-1/2 -translate-y-1/2 w-6 h-6 bg-neutral-800/90 backdrop-blur-sm border border-neutral-600 rounded-full flex items-center justify-center sm:hidden hover:bg-neutral-700/90 transition-colors duration-200"
+              >
+                <i className="fas fa-chevron-left text-neutral-300 text-xs"></i>
+              </button>
+              <button 
+                onClick={() => scrollSubcategories('right', true)}
+                className="absolute right-0 top-1/2 -translate-y-1/2 w-6 h-6 bg-neutral-800/90 backdrop-blur-sm border border-neutral-600 rounded-full flex items-center justify-center sm:hidden hover:bg-neutral-700/90 transition-colors duration-200"
+              >
+                <i className="fas fa-chevron-right text-neutral-300 text-xs"></i>
+              </button>
             </div>
           </div>
         </div>

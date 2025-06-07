@@ -37,7 +37,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="color-scheme" content="dark only" />
+        <meta name="theme-color" content="#0a0a0a" />
+        <meta name="msapplication-navbutton-color" content="#0a0a0a" />
+        <meta name="apple-mobile-web-app-title" content="Audiophile Terms" />
         <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+        <link rel="apple-touch-icon" href="/icon.svg" />
       </head>
       <body className="antialiased">
         {children}
