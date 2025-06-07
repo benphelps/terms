@@ -37,6 +37,7 @@ export function TestTracks({ tracks }: TestTracksProps) {
               onClick={handlePrevPage}
               disabled={currentPage === 0}
               className="w-6 h-6 flex items-center justify-center rounded text-neutral-400 hover:text-neutral-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              aria-label="Previous page of test tracks"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -49,6 +50,7 @@ export function TestTracks({ tracks }: TestTracksProps) {
               onClick={handleNextPage}
               disabled={currentPage === totalPages - 1}
               className="w-6 h-6 flex items-center justify-center rounded text-neutral-400 hover:text-neutral-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              aria-label="Next page of test tracks"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
