@@ -18,6 +18,13 @@ interface AudioState {
 let globalAudioState: AudioState | null = null;
 const progressCallbacks: Set<(query: string, progress: number, duration: number) => void> = new Set();
 
+// Global state that all hook instances share
+let globalCurrentTrack: string | null = null;
+let globalProgress: number = 0;
+let globalDuration: number = 0;
+let globalIsLoading: boolean = false;
+const stateUpdateCallbacks: Set<() => void> = new Set();
+
 // Expose global audio state to window for volume control
 if (typeof window !== 'undefined') {
   const globalWindow = window as typeof window & { getGlobalAudioState?: () => AudioState | null };
@@ -25,25 +32,53 @@ if (typeof window !== 'undefined') {
 }
 
 export const useMusicPlayer = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [currentTrack, setCurrentTrack] = useState<string | null>(null);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [isLoading, setIsLoading] = useState(globalIsLoading);
+  const [currentTrack, setCurrentTrack] = useState<string | null>(globalCurrentTrack);
+  const [progress, setProgress] = useState(globalProgress);
+  const [duration, setDuration] = useState(globalDuration);
   const [noPreviewTracks, setNoPreviewTracks] = useState<Set<string>>(new Set());
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Subscribe to global state changes
+  React.useEffect(() => {
+    const updateLocalState = () => {
+      setIsLoading(globalIsLoading);
+      setCurrentTrack(globalCurrentTrack);
+      setProgress(globalProgress);
+      setDuration(globalDuration);
+    };
+    
+    stateUpdateCallbacks.add(updateLocalState);
+    return () => {
+      stateUpdateCallbacks.delete(updateLocalState);
+    };
+  }, []);
+  
+  // Helper function to update global state and notify all instances
+  const updateGlobalState = (updates: Partial<{
+    isLoading: boolean;
+    currentTrack: string | null;
+    progress: number;
+    duration: number;
+  }>) => {
+    if (updates.isLoading !== undefined) globalIsLoading = updates.isLoading;
+    if (updates.currentTrack !== undefined) globalCurrentTrack = updates.currentTrack;
+    if (updates.progress !== undefined) globalProgress = updates.progress;
+    if (updates.duration !== undefined) globalDuration = updates.duration;
+    
+    // Notify all hook instances
+    stateUpdateCallbacks.forEach(callback => callback());
+  };
 
   const updateProgress = useCallback((query: string, prog: number, dur: number) => {
-    if (query === currentTrack) {
-      setProgress(prog);
-      setDuration(dur);
+    if (query === globalCurrentTrack) {
+      updateGlobalState({ progress: prog, duration: dur });
     }
     // If progress is 0 and this was our current track, reset to stopped state
-    if (query === currentTrack && prog === 0 && dur === 0) {
-      setCurrentTrack(null);
-      setProgress(0);
-      setDuration(0);
+    if (query === globalCurrentTrack && prog === 0 && dur === 0) {
+      updateGlobalState({ currentTrack: null, progress: 0, duration: 0 });
     }
-  }, [currentTrack]);
+  }, []);
 
   // Register/unregister progress callback
   React.useEffect(() => {
@@ -54,7 +89,7 @@ export const useMusicPlayer = () => {
   }, [updateProgress]);
 
   const searchTrack = async (query: string): Promise<MusicTrack | null> => {
-    setIsLoading(true);
+    updateGlobalState({ isLoading: true });
     
     try {
       const deezerUrl = `https://api.deezer.com/search?q=${encodeURIComponent(query)}&limit=5`;
@@ -94,7 +129,7 @@ export const useMusicPlayer = () => {
       // Both attempts failed
       return null;
     } finally {
-      setIsLoading(false);
+      updateGlobalState({ isLoading: false });
     }
   };
 
@@ -116,9 +151,7 @@ export const useMusicPlayer = () => {
     }
 
     // Reset all track states
-    setCurrentTrack(null);
-    setProgress(0);
-    setDuration(0);
+    updateGlobalState({ currentTrack: null, progress: 0, duration: 0 });
 
     const track = await searchTrack(query);
     
@@ -134,18 +167,16 @@ export const useMusicPlayer = () => {
         duration: 0
       };
 
-      setCurrentTrack(query);
+      updateGlobalState({ currentTrack: query });
 
       audio.addEventListener('loadedmetadata', () => {
         const dur = audio.duration;
-        setDuration(dur);
+        updateGlobalState({ duration: dur });
         globalAudioState!.duration = dur;
       });
 
       audio.addEventListener('ended', () => {
-        setCurrentTrack(null);
-        setProgress(0);
-        setDuration(0);
+        updateGlobalState({ currentTrack: null, progress: 0, duration: 0 });
         globalAudioState = null;
         if (progressIntervalRef.current) {
           clearInterval(progressIntervalRef.current);
@@ -168,9 +199,7 @@ export const useMusicPlayer = () => {
       }, 100);
 
       audio.play().catch(() => {
-        setCurrentTrack(null);
-        setProgress(0);
-        setDuration(0);
+        updateGlobalState({ currentTrack: null, progress: 0, duration: 0 });
         globalAudioState = null;
         if (progressIntervalRef.current) {
           clearInterval(progressIntervalRef.current);
@@ -178,18 +207,14 @@ export const useMusicPlayer = () => {
       });
     } else {
       setNoPreviewTracks(prev => new Set(prev).add(query));
-      setCurrentTrack(null);
-      setProgress(0);
-      setDuration(0);
+      updateGlobalState({ currentTrack: null, progress: 0, duration: 0 });
     }
   };
 
   const stopTrack = () => {
     if (globalAudioState) {
       globalAudioState.audio.pause();
-      setCurrentTrack(null);
-      setProgress(0);
-      setDuration(0);
+      updateGlobalState({ currentTrack: null, progress: 0, duration: 0 });
       globalAudioState = null;
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);

@@ -4,9 +4,16 @@ import { audioTermTracks } from "../data/tracksData";
 import { audioTermProducts } from "../data/productData";
 import { TestTracks } from "./TestTracks";
 
+interface SearchMatch {
+  key: string;
+  value: string;
+  indices: [number, number][];
+}
+
 interface TermPageContentProps {
   term: AudioTerm;
   searchQuery?: string;
+  searchMatches?: Record<string, SearchMatch[]>;
   onSearchTerm: (term: string) => void;
   onOpenTerm: (term: AudioTerm) => void;
   termsData: AudioTerm[];
@@ -30,11 +37,22 @@ function highlightText(
 export function TermPageContent({
   term,
   searchQuery = "",
+  searchMatches = {},
   onSearchTerm,
   onOpenTerm,
   termsData,
   onBackToHome,
 }: TermPageContentProps) {
+  // Check if this term had product name matches
+  const hasProductNameMatch = searchMatches[term.term]?.some(
+    (match: SearchMatch) => match.key === "productNames"
+  );
+
+  // Check if this term had track info matches
+  const hasTrackInfoMatch = searchMatches[term.term]?.some(
+    (match: SearchMatch) => match.key === "trackInfo"
+  );
+
   const handleRelatedTermClick = (relatedTerm: string) => {
     // Check if this is an actual term in our dictionary
     const actualTerm = termsData.find(
@@ -56,10 +74,14 @@ export function TermPageContent({
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
-            <h1 
+            <h1
               className="text-4xl font-bold text-neutral-200"
               dangerouslySetInnerHTML={{
-                __html: highlightText(term.term, searchQuery, "modal-highlight"),
+                __html: highlightText(
+                  term.term,
+                  searchQuery,
+                  "modal-highlight"
+                ),
               }}
             />
             <div
@@ -75,7 +97,7 @@ export function TermPageContent({
             `}
             />
           </div>
-          
+
           {onBackToHome ? (
             <button
               onClick={onBackToHome}
@@ -106,7 +128,7 @@ export function TermPageContent({
           ))}
         </div>
 
-        <p 
+        <p
           className="text-lg text-neutral-300 leading-relaxed mb-4"
           dangerouslySetInnerHTML={{
             __html: highlightText(term.summary, searchQuery, "modal-highlight"),
@@ -114,103 +136,199 @@ export function TermPageContent({
         />
       </div>
 
-      {/* Related Terms */}
+      {/* Related Terms & Test Tracks Layout */}
       {(term.relatedTerms.length > 0 ||
-        (term.oppositeTerms && term.oppositeTerms.length > 0)) && (
+        (term.oppositeTerms && term.oppositeTerms.length > 0) ||
+        audioTermTracks[term.term as keyof typeof audioTermTracks]) && (
         <div className="mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {term.relatedTerms.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Related Terms Column */}
+            {(term.relatedTerms.length > 0 ||
+              (term.oppositeTerms && term.oppositeTerms.length > 0)) && (
               <div>
-                <h2 className="text-sm font-medium text-neutral-400 mb-3">
-                  Similar Concepts
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  {term.relatedTerms.map((relatedTerm) => (
-                    <button
-                      key={relatedTerm}
-                      onClick={() => handleRelatedTermClick(relatedTerm)}
-                      className="px-2 py-1 border-2 rounded-2xl text-xs font-medium whitespace-nowrap min-h-6 flex items-center transition-all duration-300 cursor-pointer bg-neutral-900 border-emerald-500/30 text-emerald-400 hover:border-emerald-500 hover:text-emerald-500"
-                    >
-                      {relatedTerm}
-                    </button>
-                  ))}
+                <div className="flex items-center gap-2 mb-4">
+                  <h3 className="text-xl font-semibold text-neutral-200">
+                    Concepts
+                  </h3>
+                  <div className="relative group">
+                    <i className="fas fa-info-circle text-neutral-500 hover:text-neutral-300 cursor-help transition-colors"></i>
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-neutral-800 text-neutral-200 text-sm rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-10">
+                      Audio terms related to this concept
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-neutral-800"></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4">
+                  {term.relatedTerms.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-neutral-400 mb-2">
+                        Similar
+                      </h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {term.relatedTerms.map((relatedTerm) => (
+                          <button
+                            key={relatedTerm}
+                            onClick={() => handleRelatedTermClick(relatedTerm)}
+                            className="px-2 py-1 border-2 rounded-2xl text-xs font-medium whitespace-nowrap min-h-6 flex items-center transition-all duration-300 cursor-pointer bg-neutral-900 border-emerald-500/30 text-emerald-400 hover:border-emerald-500 hover:text-emerald-500"
+                          >
+                            {relatedTerm}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {term.oppositeTerms && term.oppositeTerms.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-medium text-neutral-400 mb-2">
+                        Opposite
+                      </h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {term.oppositeTerms.map((oppositeTerm) => (
+                          <button
+                            key={oppositeTerm}
+                            onClick={() => handleRelatedTermClick(oppositeTerm)}
+                            className="px-2 py-1 border-2 rounded-2xl text-xs font-medium whitespace-nowrap min-h-6 flex items-center transition-all duration-300 cursor-pointer bg-neutral-900 border-amber-500/30 text-amber-400 hover:border-amber-500 hover:text-amber-500"
+                          >
+                            {oppositeTerm}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
 
-            {term.oppositeTerms && term.oppositeTerms.length > 0 && (
+            {/* Test Tracks Column */}
+            {audioTermTracks[term.term as keyof typeof audioTermTracks] && (
               <div>
-                <h2 className="text-sm font-medium text-neutral-400 mb-3">
-                  Opposite Concepts
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  {term.oppositeTerms.map((oppositeTerm) => (
-                    <button
-                      key={oppositeTerm}
-                      onClick={() => handleRelatedTermClick(oppositeTerm)}
-                      className="px-2 py-1 border-2 rounded-2xl text-xs font-medium whitespace-nowrap min-h-6 flex items-center transition-all duration-300 cursor-pointer bg-neutral-900 border-amber-500/30 text-amber-400 hover:border-amber-500 hover:text-amber-500"
-                    >
-                      {oppositeTerm}
-                    </button>
-                  ))}
-                </div>
+                <TestTracks
+                  tracks={
+                    audioTermTracks[term.term as keyof typeof audioTermTracks]
+                  }
+                  searchQuery={searchQuery}
+                  hasTrackMatch={hasTrackInfoMatch}
+                />
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* Test Tracks */}
-      {audioTermTracks[term.term as keyof typeof audioTermTracks] && (
-        <div className="mb-8">
-          <TestTracks
-            tracks={audioTermTracks[term.term as keyof typeof audioTermTracks]}
-          />
-        </div>
-      )}
-
       {/* Example Products */}
       {audioTermProducts[term.term as keyof typeof audioTermProducts] && (
         <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4 text-neutral-200">
-            Example Products
-          </h3>
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-xl font-semibold text-neutral-200">
+              Example Products
+            </h3>
+            <div className="relative group">
+              <i className="fas fa-info-circle text-neutral-500 hover:text-neutral-300 cursor-help transition-colors"></i>
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-neutral-800 text-neutral-200 text-sm rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-10">
+                Products that are examples of this term
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-neutral-800"></div>
+              </div>
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* IEMs */}
-            {audioTermProducts[term.term as keyof typeof audioTermProducts].iem && 
-             audioTermProducts[term.term as keyof typeof audioTermProducts].iem.length > 0 && (
-              <div>
-                <h4 className="text-sm font-medium text-neutral-400 mb-3">In-Ear Monitors</h4>
-                <div className="flex flex-wrap gap-2">
-                  {audioTermProducts[term.term as keyof typeof audioTermProducts].iem.map((product) => (
-                    <span
-                      key={product}
-                      className="px-3 py-1.5 bg-neutral-900 border border-neutral-800 rounded-full text-xs text-neutral-300"
-                    >
-                      {product}
-                    </span>
-                  ))}
+            {audioTermProducts[term.term as keyof typeof audioTermProducts]
+              .iem &&
+              audioTermProducts[term.term as keyof typeof audioTermProducts].iem
+                .length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium text-neutral-400 mb-3">
+                    In-Ear Monitors
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {audioTermProducts[
+                      term.term as keyof typeof audioTermProducts
+                    ].iem.map((product) => (
+                      <span
+                        key={product.name}
+                        className="px-3 py-1.5 bg-neutral-900 border border-neutral-800 rounded-full text-xs text-neutral-300 flex items-center gap-1.5"
+                      >
+                        <span
+                          dangerouslySetInnerHTML={{
+                            __html: hasProductNameMatch
+                              ? highlightText(
+                                  product.name,
+                                  searchQuery,
+                                  "modal-highlight"
+                                )
+                              : product.name,
+                          }}
+                        />
+                        <span
+                          className={`text-[10px] ${
+                            product.tier === "budget"
+                              ? "text-emerald-400"
+                              : product.tier === "mid-tier"
+                              ? "text-amber-400"
+                              : "text-purple-400"
+                          }`}
+                        >
+                          {product.tier === "budget"
+                            ? "$"
+                            : product.tier === "mid-tier"
+                            ? "$$"
+                            : "$$$"}
+                        </span>
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-            
+              )}
+
             {/* Headphones */}
-            {audioTermProducts[term.term as keyof typeof audioTermProducts].headphone && 
-             audioTermProducts[term.term as keyof typeof audioTermProducts].headphone.length > 0 && (
-              <div>
-                <h4 className="text-sm font-medium text-neutral-400 mb-3">Headphones</h4>
-                <div className="flex flex-wrap gap-2">
-                  {audioTermProducts[term.term as keyof typeof audioTermProducts].headphone.map((product) => (
-                    <span
-                      key={product}
-                      className="px-3 py-1.5 bg-neutral-900 border border-neutral-800 rounded-full text-xs text-neutral-300"
-                    >
-                      {product}
-                    </span>
-                  ))}
+            {audioTermProducts[term.term as keyof typeof audioTermProducts]
+              .headphone &&
+              audioTermProducts[term.term as keyof typeof audioTermProducts]
+                .headphone.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium text-neutral-400 mb-3">
+                    Headphones
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {audioTermProducts[
+                      term.term as keyof typeof audioTermProducts
+                    ].headphone.map((product) => (
+                      <span
+                        key={product.name}
+                        className="px-3 py-1.5 bg-neutral-900 border border-neutral-800 rounded-full text-xs text-neutral-300 flex items-center gap-1.5"
+                      >
+                        <span
+                          dangerouslySetInnerHTML={{
+                            __html: hasProductNameMatch
+                              ? highlightText(
+                                  product.name,
+                                  searchQuery,
+                                  "modal-highlight"
+                                )
+                              : product.name,
+                          }}
+                        />
+                        <span
+                          className={`text-[10px] ${
+                            product.tier === "budget"
+                              ? "text-emerald-400"
+                              : product.tier === "mid-tier"
+                              ? "text-amber-400"
+                              : "text-purple-400"
+                          }`}
+                        >
+                          {product.tier === "budget"
+                            ? "$"
+                            : product.tier === "mid-tier"
+                            ? "$$"
+                            : "$$$"}
+                        </span>
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         </div>
       )}
@@ -222,7 +340,13 @@ export function TermPageContent({
         </h3>
         <div
           className="text-neutral-300 leading-relaxed prose prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: highlightText(term.shortExplanation, searchQuery, "modal-highlight") }}
+          dangerouslySetInnerHTML={{
+            __html: highlightText(
+              term.shortExplanation,
+              searchQuery,
+              "modal-highlight"
+            ),
+          }}
         />
       </div>
 
@@ -233,7 +357,13 @@ export function TermPageContent({
         </h3>
         <div
           className="text-neutral-300 leading-relaxed prose prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: highlightText(term.detailedDescription, searchQuery, "modal-highlight") }}
+          dangerouslySetInnerHTML={{
+            __html: highlightText(
+              term.detailedDescription,
+              searchQuery,
+              "modal-highlight"
+            ),
+          }}
         />
       </div>
     </>

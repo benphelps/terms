@@ -42,7 +42,7 @@ export default function HomePage() {
     });
   };
 
-  const { searchQuery, setSearchQuery, searchResults, hasSearchQuery } =
+  const { searchQuery, setSearchQuery, searchResults, searchMatches, hasSearchQuery } =
     useSearch(termsData);
 
   // Check for search parameter and term slug in URL
@@ -458,6 +458,7 @@ export default function HomePage() {
         <Modal
           term={selectedTerm}
           searchQuery={searchQuery}
+          searchMatches={searchMatches}
           onClose={handleCloseModal}
           onSearchTerm={handleSearchFromModal}
           onOpenTerm={handleOpenTerm}

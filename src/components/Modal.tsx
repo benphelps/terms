@@ -2,9 +2,16 @@ import { useEffect } from "react";
 import type { AudioTerm } from "../types";
 import { TermPageContent } from "./TermPageContent";
 
+interface SearchMatch {
+  key: string;
+  value: string;
+  indices: [number, number][];
+}
+
 interface ModalProps {
   term: AudioTerm | null;
   searchQuery?: string;
+  searchMatches?: Record<string, SearchMatch[]>;
   onClose: () => void;
   onSearchTerm: (term: string) => void;
   onOpenTerm: (term: AudioTerm) => void;
@@ -15,6 +22,7 @@ interface ModalProps {
 export function Modal({
   term,
   searchQuery = "",
+  searchMatches = {},
   onClose,
   onSearchTerm,
   onOpenTerm,
@@ -84,6 +92,7 @@ export function Modal({
           <TermPageContent 
             term={term} 
             searchQuery={searchQuery}
+            searchMatches={searchMatches}
             onSearchTerm={(searchTerm) => {
               onClose();
               onSearchTerm(searchTerm);

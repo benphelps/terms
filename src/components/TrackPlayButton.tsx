@@ -16,13 +16,10 @@ export function TrackPlayButton({
     isLoading,
     isPlaying,
     currentTrack,
-    progress,
-    duration,
     noPreviewTracks,
   } = useMusicPlayer();
 
   const isCurrentTrack = currentTrack === track;
-  const progressPercent = duration > 0 ? (progress / duration) * 100 : 0;
   const hasNoPreview = noPreviewTracks.has(track);
 
   const handlePlay = async (e: React.MouseEvent) => {
@@ -63,15 +60,6 @@ export function TrackPlayButton({
           : `Play ${track}`
       }
     >
-      {/* Progress background */}
-      {isCurrentTrack && (
-        <div
-          className="absolute inset-0 bg-emerald-500/30 transition-all duration-100"
-          style={{
-            background: `conic-gradient(from 0deg, rgb(16 185 129 / 0.5) 0%, rgb(16 185 129 / 0.5) ${progressPercent}%, transparent ${progressPercent}%, transparent 100%)`,
-          }}
-        />
-      )}
 
       {/* Icon */}
       <div className="relative z-5">

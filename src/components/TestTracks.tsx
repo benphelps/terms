@@ -4,15 +4,18 @@ import { TrackRow } from "./TrackRow";
 
 interface TestTracksProps {
   tracks: string[];
+  searchQuery?: string;
+  hasTrackMatch?: boolean;
 }
 
-export function TestTracks({ tracks }: TestTracksProps) {
+export function TestTracks({ tracks, searchQuery = "", hasTrackMatch = false }: TestTracksProps) {
   const [currentPage, setCurrentPage] = useState(0);
   const [volume, setVolume] = useState(0.5);
   const [showVolumeOnMobile, setShowVolumeOnMobile] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volumeBeforeMute, setVolumeBeforeMute] = useState(0.5);
+  const [hasHydrated, setHasHydrated] = useState(false);
   const volumeAreaRef = useRef<HTMLDivElement>(null);
   const closeVolumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const tracksPerPage = 3;
@@ -68,6 +71,9 @@ export function TestTracks({ tracks }: TestTracksProps) {
       } else {
         // Mute: save current volume and set to 0
         setVolumeBeforeMute(volume);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('audioVolumeBeforeMute', volume.toString());
+        }
         updateVolume(0);
         setIsMuted(true);
       }
@@ -78,11 +84,22 @@ export function TestTracks({ tracks }: TestTracksProps) {
     const clampedVolume = Math.max(0, Math.min(1, newVolume));
     setVolume(clampedVolume);
     
+    // Save volume to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('audioVolume', clampedVolume.toString());
+    }
+    
     // Update mute state based on volume
     if (clampedVolume === 0 && !isMuted) {
       setIsMuted(true);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('audioMuted', 'true');
+      }
     } else if (clampedVolume > 0 && isMuted) {
       setIsMuted(false);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('audioMuted', 'false');
+      }
     }
     
     // Update global audio volume if audio is playing
@@ -103,11 +120,27 @@ export function TestTracks({ tracks }: TestTracksProps) {
   }, [isMuted, isMobile, showVolumeOnMobile, scheduleVolumeClose]);
 
   const getVolumeIcon = () => {
+    // Use default icon until hydrated to prevent mismatch
+    if (!hasHydrated) return <Volume2 className="w-4 h-4" />;
+    
     if (isMuted || volume === 0) return <VolumeX className="w-4 h-4" />;
     if (volume < 0.33) return <Volume className="w-4 h-4" />;
     if (volume < 0.66) return <Volume1 className="w-4 h-4" />;
     return <Volume2 className="w-4 h-4" />;
   };
+
+  // Load saved volume settings after hydration
+  useEffect(() => {
+    const savedVolume = localStorage.getItem('audioVolume');
+    const savedMuted = localStorage.getItem('audioMuted');
+    const savedVolumeBeforeMute = localStorage.getItem('audioVolumeBeforeMute');
+    
+    if (savedVolume) setVolume(parseFloat(savedVolume));
+    if (savedMuted) setIsMuted(savedMuted === 'true');
+    if (savedVolumeBeforeMute) setVolumeBeforeMute(parseFloat(savedVolumeBeforeMute));
+    
+    setHasHydrated(true);
+  }, []);
 
   // Detect mobile devices on client side
   useEffect(() => {
@@ -145,7 +178,16 @@ export function TestTracks({ tracks }: TestTracksProps) {
     <div>
       {/* Header with Pagination */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-medium text-neutral-200">Test Tracks</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-medium text-neutral-200">Test Tracks</h2>
+          <div className="relative group">
+            <i className="fas fa-info-circle text-neutral-500 hover:text-neutral-300 cursor-help transition-colors"></i>
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-neutral-800 text-neutral-200 text-sm rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-10">
+              Music tracks that demonstrate this audio characteristic
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-neutral-800"></div>
+            </div>
+          </div>
+        </div>
 
         {totalPages > 1 && (
           <div className="flex items-center gap-2">
@@ -154,7 +196,7 @@ export function TestTracks({ tracks }: TestTracksProps) {
               <button
                 onClick={handleVolumeClick}
                 className="w-6 h-6 flex items-center justify-center rounded text-neutral-400 hover:text-neutral-200 transition-colors"
-                aria-label={isMobile ? "Volume control" : (isMuted ? "Unmute" : "Mute")}
+                aria-label={isMobile ? "Volume control" : (!hasHydrated ? "Volume" : (isMuted ? "Unmute" : "Mute"))}
               >
                 {getVolumeIcon()}
               </button>
@@ -207,7 +249,12 @@ export function TestTracks({ tracks }: TestTracksProps) {
       {/* Track List */}
       <div className="grid gap-2">
         {currentTracks.map((track, index) => (
-          <TrackRow key={startIndex + index} track={track} />
+          <TrackRow 
+            key={startIndex + index} 
+            track={track} 
+            searchQuery={searchQuery}
+            hasTrackMatch={hasTrackMatch}
+          />
         ))}
       </div>
     </div>
