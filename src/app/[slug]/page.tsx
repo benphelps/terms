@@ -24,6 +24,8 @@ export async function generateMetadata({ params }: TermPageProps): Promise<Metad
     };
   }
 
+  const ogImageUrl = `/og/${slug}.png`;
+
   return {
     title: `${term.term} - Audiophile Terminology Guide`,
     description: term.summary,
@@ -31,6 +33,20 @@ export async function generateMetadata({ params }: TermPageProps): Promise<Metad
       title: `${term.term} - Audiophile Terminology Guide`,
       description: term.summary,
       type: 'article',
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${term.term} - Audiophile terminology definition`,
+        }
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${term.term} - Audiophile Terminology Guide`,
+      description: term.summary,
+      images: [ogImageUrl],
     },
   };
 }
