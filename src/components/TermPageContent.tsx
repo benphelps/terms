@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { AudioTerm } from "../types";
 import { audioTermTracks } from "../data/tracksData";
+import { audioTermProducts } from "../data/productData";
 import { TestTracks } from "./TestTracks";
 
 interface TermPageContentProps {
@@ -165,6 +166,52 @@ export function TermPageContent({
           <TestTracks
             tracks={audioTermTracks[term.term as keyof typeof audioTermTracks]}
           />
+        </div>
+      )}
+
+      {/* Example Products */}
+      {audioTermProducts[term.term as keyof typeof audioTermProducts] && (
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold mb-4 text-neutral-200">
+            Example Products
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* IEMs */}
+            {audioTermProducts[term.term as keyof typeof audioTermProducts].iem && 
+             audioTermProducts[term.term as keyof typeof audioTermProducts].iem.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium text-neutral-400 mb-3">In-Ear Monitors</h4>
+                <div className="flex flex-wrap gap-2">
+                  {audioTermProducts[term.term as keyof typeof audioTermProducts].iem.map((product) => (
+                    <span
+                      key={product}
+                      className="px-3 py-1.5 bg-neutral-900 border border-neutral-800 rounded-full text-xs text-neutral-300"
+                    >
+                      {product}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Headphones */}
+            {audioTermProducts[term.term as keyof typeof audioTermProducts].headphone && 
+             audioTermProducts[term.term as keyof typeof audioTermProducts].headphone.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium text-neutral-400 mb-3">Headphones</h4>
+                <div className="flex flex-wrap gap-2">
+                  {audioTermProducts[term.term as keyof typeof audioTermProducts].headphone.map((product) => (
+                    <span
+                      key={product}
+                      className="px-3 py-1.5 bg-neutral-900 border border-neutral-800 rounded-full text-xs text-neutral-300"
+                    >
+                      {product}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
