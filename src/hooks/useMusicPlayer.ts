@@ -125,6 +125,7 @@ export const useMusicPlayer = () => {
     if (track?.preview) {
       const audio = new Audio(track.preview);
       audio.volume = 0.7;
+      audio.loop = true;
       
       globalAudioState = {
         audio,
