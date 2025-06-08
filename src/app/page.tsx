@@ -1,11 +1,10 @@
 "use client";
 
 import { useMemo, useState, useEffect, useRef } from "react";
-import { SearchBox } from "@/components/SearchBox";
-import { FilterButton } from "@/components/FilterButton";
 import { TermCard } from "@/components/TermCard";
 import { FrequencyChart } from "@/components/FrequencyChart";
 import { Modal } from "@/components/Modal";
+import { Controls } from "@/components/Controls";
 import { useSearch } from "@/hooks/useSearch";
 import { useFilters } from "@/hooks/useFilters";
 import { termsData } from "@/data";
@@ -255,75 +254,18 @@ export default function HomePage() {
       >
         <div className="container mx-auto max-w-6xl px-5">
           <div className="p-6 pt-0 relative">
-            <div className="flex flex-col gap-4 w-full">
-              {/* First row: Search + Clear + Sentiment */}
-              <div className="flex flex-col lg:flex-row items-center justify-center gap-6">
-                <div className="flex items-center gap-2">
-                  <SearchBox value={searchQuery} onChange={setSearchQuery} />
-
-                  {/* Clear Button */}
-                  <button
-                    onClick={handleClearFilters}
-                    className="px-4 py-1 bg-neutral-900 border-2 border-neutral-700 rounded-2xl text-neutral-400 text-sm font-medium hover:bg-blue-400 hover:text-neutral-900 hover:border-blue-400 transition-all duration-300 flex-shrink-0 h-8 flex items-center"
-                  >
-                    Clear
-                  </button>
-                </div>
-
-                {/* Primary Filters */}
-                <div className="flex flex-wrap gap-1 justify-center items-center">
-                  {[
-                    { value: "all" as const, label: "All" },
-                    { value: "positive" as const, label: "Positive" },
-                    { value: "negative" as const, label: "Negative" },
-                    { value: "neutral" as const, label: "Neutral" },
-                  ].map((filter) => (
-                    <FilterButton
-                      key={filter.value}
-                      filter={filter.value}
-                      isActive={primaryFilter === filter.value}
-                      onClick={() => setPrimaryFilter(filter.value)}
-                      type="primary"
-                    >
-                      {filter.label}
-                    </FilterButton>
-                  ))}
-                </div>
-              </div>
-
-              {/* Second row: Subcategory Filters */}
-              <div className="relative w-full">
-                <div
-                  ref={subcategoryScrollRef}
-                  className="flex gap-1 sm:gap-2 overflow-x-auto sm:overflow-x-visible scrollbar-hide items-center px-8 sm:px-0 sm:justify-center sm:flex-wrap"
-                >
-                  {allSubcategories.map((category) => (
-                    <FilterButton
-                      key={category}
-                      filter={category}
-                      isActive={subcategoryFilters.includes(category)}
-                      onClick={() => toggleSubcategoryFilter(category)}
-                      type="subcategory"
-                    >
-                      {category}
-                    </FilterButton>
-                  ))}
-                </div>
-                {/* Scroll indicators for very small screens only */}
-                <button
-                  onClick={() => scrollSubcategories("left", false)}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-6 h-6 bg-neutral-800/80 backdrop-blur-sm border border-neutral-700 rounded-full flex items-center justify-center sm:hidden hover:bg-neutral-700/80 transition-colors duration-200"
-                >
-                  <i className="fas fa-chevron-left text-neutral-400 text-xs"></i>
-                </button>
-                <button
-                  onClick={() => scrollSubcategories("right", false)}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 w-6 h-6 bg-neutral-800/80 backdrop-blur-sm border border-neutral-700 rounded-full flex items-center justify-center sm:hidden hover:bg-neutral-700/80 transition-colors duration-200"
-                >
-                  <i className="fas fa-chevron-right text-neutral-400 text-xs"></i>
-                </button>
-              </div>
-            </div>
+            <Controls
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onClearFilters={handleClearFilters}
+              primaryFilter={primaryFilter}
+              onPrimaryFilterChange={setPrimaryFilter}
+              subcategoryFilters={subcategoryFilters}
+              allSubcategories={allSubcategories}
+              onToggleSubcategoryFilter={toggleSubcategoryFilter}
+              onScrollSubcategories={scrollSubcategories}
+              subcategoryScrollRef={subcategoryScrollRef}
+            />
           </div>
         </div>
       </div>
@@ -338,75 +280,19 @@ export default function HomePage() {
         style={{ width: "calc(100% - 40px)", maxWidth: "1152px" }}
       >
         <div className="p-6">
-          <div className="flex flex-col gap-4 w-full">
-            {/* First row: Search + Clear + Sentiment */}
-            <div className="flex flex-col lg:flex-row items-center justify-center gap-6">
-              <div className="flex items-center gap-4">
-                <SearchBox value={searchQuery} onChange={setSearchQuery} />
-
-                {/* Clear Button */}
-                <button
-                  onClick={handleClearFilters}
-                  className="px-4 py-1 bg-neutral-900 border-2 border-neutral-700 rounded-2xl text-neutral-400 text-sm font-medium hover:bg-blue-400 hover:text-neutral-900 hover:border-blue-400 transition-all duration-300 flex-shrink-0 h-8 flex items-center"
-                >
-                  Clear
-                </button>
-              </div>
-
-              {/* Primary Filters */}
-              <div className="flex flex-wrap gap-2 justify-center items-center">
-                {[
-                  { value: "all" as const, label: "All" },
-                  { value: "positive" as const, label: "Positive" },
-                  { value: "negative" as const, label: "Negative" },
-                  { value: "neutral" as const, label: "Neutral" },
-                ].map((filter) => (
-                  <FilterButton
-                    key={filter.value}
-                    filter={filter.value}
-                    isActive={primaryFilter === filter.value}
-                    onClick={() => setPrimaryFilter(filter.value)}
-                    type="primary"
-                  >
-                    {filter.label}
-                  </FilterButton>
-                ))}
-              </div>
-            </div>
-
-            {/* Second row: Subcategory Filters */}
-            <div className="relative w-full">
-              <div
-                ref={stickySubcategoryScrollRef}
-                className="flex gap-1 sm:gap-2 overflow-x-auto sm:overflow-x-visible scrollbar-hide items-center px-8 sm:px-0 sm:justify-center sm:flex-wrap"
-              >
-                {allSubcategories.map((category) => (
-                  <FilterButton
-                    key={category}
-                    filter={category}
-                    isActive={subcategoryFilters.includes(category)}
-                    onClick={() => toggleSubcategoryFilter(category)}
-                    type="subcategory"
-                  >
-                    {category}
-                  </FilterButton>
-                ))}
-              </div>
-              {/* Scroll indicators for very small screens only */}
-              <button
-                onClick={() => scrollSubcategories("left", true)}
-                className="absolute left-0 top-1/2 -translate-y-1/2 w-6 h-6 bg-neutral-800/90 backdrop-blur-sm border border-neutral-600 rounded-full flex items-center justify-center sm:hidden hover:bg-neutral-700/90 transition-colors duration-200"
-              >
-                <i className="fas fa-chevron-left text-neutral-300 text-xs"></i>
-              </button>
-              <button
-                onClick={() => scrollSubcategories("right", true)}
-                className="absolute right-0 top-1/2 -translate-y-1/2 w-6 h-6 bg-neutral-800/90 backdrop-blur-sm border border-neutral-600 rounded-full flex items-center justify-center sm:hidden hover:bg-neutral-700/90 transition-colors duration-200"
-              >
-                <i className="fas fa-chevron-right text-neutral-300 text-xs"></i>
-              </button>
-            </div>
-          </div>
+          <Controls
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onClearFilters={handleClearFilters}
+            primaryFilter={primaryFilter}
+            onPrimaryFilterChange={setPrimaryFilter}
+            subcategoryFilters={subcategoryFilters}
+            allSubcategories={allSubcategories}
+            onToggleSubcategoryFilter={toggleSubcategoryFilter}
+            onScrollSubcategories={scrollSubcategories}
+            subcategoryScrollRef={stickySubcategoryScrollRef}
+            isSticky={true}
+          />
         </div>
       </div>
 
@@ -425,6 +311,7 @@ export default function HomePage() {
               key={term.term}
               term={term}
               searchQuery={searchQuery}
+              searchMatches={searchMatches[term.term]}
               onOpenModal={handleOpenTerm}
             />
           ))}
