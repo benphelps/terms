@@ -38,13 +38,14 @@ body {
 
 /* Aggressive mobile landscape fix */
 @media screen and (orientation: landscape) {
-  html, body {
+  html,
+  body {
     width: 100vw !important;
     min-width: 100vw !important;
     max-width: 100vw !important;
     overflow-x: hidden !important;
   }
-  
+
   /* Force containers to respect viewport on mobile landscape only */
   @media screen and (max-width: 1024px) {
     .container {
@@ -53,7 +54,7 @@ body {
       padding-right: 1rem !important;
     }
   }
-  
+
   /* Fix sticky filters width on mobile landscape only */
   @media screen and (max-width: 1024px) {
     [style*="calc(100% - 40px)"] {
@@ -258,11 +259,11 @@ mark.modal-highlight {
 
 /* Scrollbar hiding utility */
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* Internet Explorer 10+ */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
 }
 .scrollbar-hide::-webkit-scrollbar {
-  display: none;  /* Safari and Chrome */
+  display: none; /* Safari and Chrome */
 }
 
 /* Chart styles */
@@ -295,8 +296,8 @@ mark.modal-highlight {
 /* Volume Slider Styling */
 .slider::-webkit-slider-thumb {
   appearance: none;
-  height: 12px;
-  width: 12px;
+  height: 14px;
+  width: 14px;
   border-radius: 50%;
   background: #10b981;
   cursor: pointer;
@@ -304,8 +305,8 @@ mark.modal-highlight {
 }
 
 .slider::-moz-range-thumb {
-  height: 12px;
-  width: 12px;
+  height: 14px;
+  width: 14px;
   border-radius: 50%;
   background: #10b981;
   cursor: pointer;

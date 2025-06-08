@@ -12,7 +12,6 @@ import { termsData } from "@/data";
 import type { AudioTerm } from "@/types";
 
 export default function HomePage() {
-  const [expandedTermId, setExpandedTermId] = useState<string | null>(null);
   const [isFiltersSticky, setIsFiltersSticky] = useState(false);
   const [selectedTerm, setSelectedTerm] = useState<AudioTerm | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -155,9 +154,6 @@ export default function HomePage() {
     }
   };
 
-  const handleCardExpand = (termId: string) => {
-    setExpandedTermId(expandedTermId === termId ? null : termId);
-  };
 
   // Handle browser back/forward buttons
   useEffect(() => {
@@ -247,7 +243,7 @@ export default function HomePage() {
             Audiophile Terminology Guide
           </h1>
           <p className="text-neutral-400 text-lg">
-            Interactive reference for audio enthusiasts
+            Explore the language of audio with interactive charts and curated examples
           </p>
         </header>
       </div>
@@ -429,9 +425,7 @@ export default function HomePage() {
               key={term.term}
               term={term}
               searchQuery={searchQuery}
-              isExpanded={expandedTermId === term.term}
               onOpenModal={handleOpenTerm}
-              onExpand={handleCardExpand}
             />
           ))}
         </div>

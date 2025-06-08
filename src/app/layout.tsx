@@ -6,14 +6,14 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://www.audiowords.net"),
   title: "Audiophile Terminology Guide",
   description:
-    "Interactive reference guide for audiophile terminology. Explore audio terms with sentiment analysis, frequency charts, and detailed explanations.",
+    "Explore the language of audio with interactive charts and curated examples.",
   keywords:
     "audiophile, audio terminology, frequency response, sound quality, audio terms, audio guide",
   openGraph: {
     type: "website",
     title: "Audiophile Terminology Guide",
     description:
-      "Interactive reference guide for audiophile terminology. Explore audio terms with sentiment analysis, frequency charts, and detailed explanations.",
+      "Explore the language of audio with interactive charts and curated examples.",
     url: "/",
     siteName: "Audiophile Terminology Guide",
     images: [
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Audiophile Terminology Guide",
     description:
-      "Interactive reference guide for audiophile terminology. Explore audio terms with sentiment analysis, frequency charts, and detailed explanations.",
+      "Explore the language of audio with interactive charts and curated examples.",
     images: ["/og-image.png"],
   },
 };
@@ -46,7 +46,7 @@ export default function RootLayout({
           name="viewport"
           content="width=device-width, initial-scale=1.0, viewport-fit=cover"
         />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta
           name="apple-mobile-web-app-status-bar-style"
           content="black-translucent"

@@ -146,17 +146,11 @@ export function TermPageContent({
             {(term.relatedTerms.length > 0 ||
               (term.oppositeTerms && term.oppositeTerms.length > 0)) && (
               <div>
-                <div className="flex items-center gap-2 mb-4">
+                <div className="mb-4">
                   <h3 className="text-xl font-semibold text-neutral-200">
-                    Concepts
+                    Characteristics
                   </h3>
-                  <div className="relative group">
-                    <i className="fas fa-info-circle text-neutral-500 hover:text-neutral-300 cursor-help transition-colors"></i>
-                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-neutral-800 text-neutral-200 text-sm rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-10">
-                      Audio terms related to this concept
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-neutral-800"></div>
-                    </div>
-                  </div>
+                  <p className="text-xs text-neutral-500">Audio terms related to this characteristic</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4">
                   {term.relatedTerms.length > 0 && (
@@ -219,17 +213,11 @@ export function TermPageContent({
       {/* Example Products */}
       {audioTermProducts[term.term as keyof typeof audioTermProducts] && (
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
+          <div className="mb-4">
             <h3 className="text-xl font-semibold text-neutral-200">
-              Example Products
+              Notable Products
             </h3>
-            <div className="relative group">
-              <i className="fas fa-info-circle text-neutral-500 hover:text-neutral-300 cursor-help transition-colors"></i>
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-neutral-800 text-neutral-200 text-sm rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-10">
-                Products that are examples of this term
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-neutral-800"></div>
-              </div>
-            </div>
+            <p className="text-xs text-neutral-500">Products recognized for this characteristic</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* IEMs */}

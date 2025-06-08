@@ -1,5 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Volume, Volume1, Volume2, VolumeX } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Volume,
+  Volume1,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import { TrackRow } from "./TrackRow";
 
 interface TestTracksProps {
@@ -8,7 +15,11 @@ interface TestTracksProps {
   hasTrackMatch?: boolean;
 }
 
-export function TestTracks({ tracks, searchQuery = "", hasTrackMatch = false }: TestTracksProps) {
+export function TestTracks({
+  tracks,
+  searchQuery = "",
+  hasTrackMatch = false,
+}: TestTracksProps) {
   const [currentPage, setCurrentPage] = useState(0);
   const [volume, setVolume] = useState(0.5);
   const [showVolumeOnMobile, setShowVolumeOnMobile] = useState(false);
@@ -52,7 +63,7 @@ export function TestTracks({ tracks, searchQuery = "", hasTrackMatch = false }: 
       // Mobile: toggle volume control visibility
       const newState = !showVolumeOnMobile;
       setShowVolumeOnMobile(newState);
-      
+
       // If opening volume control, schedule auto-close
       if (newState) {
         scheduleVolumeClose();
@@ -71,8 +82,8 @@ export function TestTracks({ tracks, searchQuery = "", hasTrackMatch = false }: 
       } else {
         // Mute: save current volume and set to 0
         setVolumeBeforeMute(volume);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('audioVolumeBeforeMute', volume.toString());
+        if (typeof window !== "undefined") {
+          localStorage.setItem("audioVolumeBeforeMute", volume.toString());
         }
         updateVolume(0);
         setIsMuted(true);
@@ -80,49 +91,54 @@ export function TestTracks({ tracks, searchQuery = "", hasTrackMatch = false }: 
     }
   };
 
-  const updateVolume = useCallback((newVolume: number) => {
-    const clampedVolume = Math.max(0, Math.min(1, newVolume));
-    setVolume(clampedVolume);
-    
-    // Save volume to localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('audioVolume', clampedVolume.toString());
-    }
-    
-    // Update mute state based on volume
-    if (clampedVolume === 0 && !isMuted) {
-      setIsMuted(true);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('audioMuted', 'true');
+  const updateVolume = useCallback(
+    (newVolume: number) => {
+      const clampedVolume = Math.max(0, Math.min(1, newVolume));
+      setVolume(clampedVolume);
+
+      // Save volume to localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem("audioVolume", clampedVolume.toString());
       }
-    } else if (clampedVolume > 0 && isMuted) {
-      setIsMuted(false);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('audioMuted', 'false');
-      }
-    }
-    
-    // Update global audio volume if audio is playing
-    if (typeof window !== 'undefined') {
-      const globalWindow = window as typeof window & { getGlobalAudioState?: () => { audio: HTMLAudioElement } | null };
-      if (globalWindow.getGlobalAudioState) {
-        const audioState = globalWindow.getGlobalAudioState();
-        if (audioState?.audio) {
-          audioState.audio.volume = clampedVolume;
+
+      // Update mute state based on volume
+      if (clampedVolume === 0 && !isMuted) {
+        setIsMuted(true);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("audioMuted", "true");
+        }
+      } else if (clampedVolume > 0 && isMuted) {
+        setIsMuted(false);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("audioMuted", "false");
         }
       }
-    }
 
-    // On mobile, if volume control is open and user adjusts volume, reset the close timer
-    if (isMobile && showVolumeOnMobile) {
-      scheduleVolumeClose();
-    }
-  }, [isMuted, isMobile, showVolumeOnMobile, scheduleVolumeClose]);
+      // Update global audio volume if audio is playing
+      if (typeof window !== "undefined") {
+        const globalWindow = window as typeof window & {
+          getGlobalAudioState?: () => { audio: HTMLAudioElement } | null;
+        };
+        if (globalWindow.getGlobalAudioState) {
+          const audioState = globalWindow.getGlobalAudioState();
+          if (audioState?.audio) {
+            audioState.audio.volume = clampedVolume;
+          }
+        }
+      }
+
+      // On mobile, if volume control is open and user adjusts volume, reset the close timer
+      if (isMobile && showVolumeOnMobile) {
+        scheduleVolumeClose();
+      }
+    },
+    [isMuted, isMobile, showVolumeOnMobile, scheduleVolumeClose]
+  );
 
   const getVolumeIcon = () => {
     // Use default icon until hydrated to prevent mismatch
     if (!hasHydrated) return <Volume2 className="w-4 h-4" />;
-    
+
     if (isMuted || volume === 0) return <VolumeX className="w-4 h-4" />;
     if (volume < 0.33) return <Volume className="w-4 h-4" />;
     if (volume < 0.66) return <Volume1 className="w-4 h-4" />;
@@ -131,35 +147,39 @@ export function TestTracks({ tracks, searchQuery = "", hasTrackMatch = false }: 
 
   // Load saved volume settings after hydration
   useEffect(() => {
-    const savedVolume = localStorage.getItem('audioVolume');
-    const savedMuted = localStorage.getItem('audioMuted');
-    const savedVolumeBeforeMute = localStorage.getItem('audioVolumeBeforeMute');
-    
+    const savedVolume = localStorage.getItem("audioVolume");
+    const savedMuted = localStorage.getItem("audioMuted");
+    const savedVolumeBeforeMute = localStorage.getItem("audioVolumeBeforeMute");
+
     if (savedVolume) setVolume(parseFloat(savedVolume));
-    if (savedMuted) setIsMuted(savedMuted === 'true');
-    if (savedVolumeBeforeMute) setVolumeBeforeMute(parseFloat(savedVolumeBeforeMute));
-    
+    if (savedMuted) setIsMuted(savedMuted === "true");
+    if (savedVolumeBeforeMute)
+      setVolumeBeforeMute(parseFloat(savedVolumeBeforeMute));
+
     setHasHydrated(true);
   }, []);
 
   // Detect mobile devices on client side
   useEffect(() => {
-    setIsMobile('ontouchstart' in window);
+    setIsMobile("ontouchstart" in window);
   }, []);
 
   // Handle mouse wheel scrolling in volume control area
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      if (volumeAreaRef.current && volumeAreaRef.current.contains(e.target as Node)) {
+      if (
+        volumeAreaRef.current &&
+        volumeAreaRef.current.contains(e.target as Node)
+      ) {
         e.preventDefault();
         const delta = e.deltaY > 0 ? -0.05 : 0.05; // Reverse direction for intuitive scrolling
         updateVolume(volume + delta);
       }
     };
 
-    document.addEventListener('wheel', handleWheel, { passive: false });
+    document.addEventListener("wheel", handleWheel, { passive: false });
     return () => {
-      document.removeEventListener('wheel', handleWheel);
+      document.removeEventListener("wheel", handleWheel);
     };
   }, [volume, updateVolume]);
 
@@ -176,51 +196,73 @@ export function TestTracks({ tracks, searchQuery = "", hasTrackMatch = false }: 
 
   return (
     <div>
-      {/* Header with Pagination */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg font-medium text-neutral-200">Test Tracks</h2>
-          <div className="relative group">
-            <i className="fas fa-info-circle text-neutral-500 hover:text-neutral-300 cursor-help transition-colors"></i>
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-neutral-800 text-neutral-200 text-sm rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-10">
-              Music tracks that demonstrate this audio characteristic
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-neutral-800"></div>
+      {/* Header */}
+      <div className="mb-4">
+        <h2 className="text-lg font-medium text-neutral-200">Test Tracks</h2>
+        <p className="text-xs text-neutral-500">
+          Music tracks that demonstrate this audio characteristic
+        </p>
+      </div>
+
+      {/* Track List */}
+      <div className="grid gap-2 mb-4">
+        {currentTracks.map((track, index) => (
+          <TrackRow
+            key={startIndex + index}
+            track={track}
+            searchQuery={searchQuery}
+            hasTrackMatch={hasTrackMatch}
+          />
+        ))}
+      </div>
+
+      {/* Controls at bottom */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          {/* Volume Control */}
+          <div className="relative flex items-center group" ref={volumeAreaRef}>
+            <button
+              onClick={handleVolumeClick}
+              className="w-8 h-8 flex items-center justify-center rounded text-neutral-400 hover:text-neutral-200 transition-colors"
+              aria-label={
+                isMobile
+                  ? "Volume control"
+                  : !hasHydrated
+                  ? "Volume"
+                  : isMuted
+                  ? "Unmute"
+                  : "Mute"
+              }
+            >
+              {getVolumeIcon()}
+            </button>
+
+            <div
+              className={`absolute left-8 -bottom-0.5 flex items-center gap-3 min-w-[140px] transition-all duration-200 px-3 py-2 ${
+                isMobile
+                  ? showVolumeOnMobile
+                    ? "opacity-100 visible"
+                    : "opacity-0 invisible"
+                  : "opacity-0 invisible group-hover:opacity-100 group-hover:visible"
+              }`}
+            >
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={volume}
+                onChange={handleVolumeChange}
+                className="flex-1 h-1 bg-neutral-600 rounded-lg appearance-none cursor-pointer slider"
+              />
+              <span className="text-sm text-neutral-400 min-w-[2.5rem]">
+                {Math.round(volume * 100)}%
+              </span>
             </div>
           </div>
-        </div>
 
-        {totalPages > 1 && (
+          {/* Pagination */}
           <div className="flex items-center gap-2">
-            {/* Volume Control */}
-            <div className="relative flex items-center group" ref={volumeAreaRef}>
-              <button
-                onClick={handleVolumeClick}
-                className="w-6 h-6 flex items-center justify-center rounded text-neutral-400 hover:text-neutral-200 transition-colors"
-                aria-label={isMobile ? "Volume control" : (!hasHydrated ? "Volume" : (isMuted ? "Unmute" : "Mute"))}
-              >
-                {getVolumeIcon()}
-              </button>
-              
-              <div className={`absolute right-6 top-0 flex items-center gap-2 min-w-[120px] transition-all duration-200 rounded-lg px-2 py-1 bg-neutral-900 shadow-xl ${
-                isMobile 
-                  ? (showVolumeOnMobile ? 'opacity-100 visible' : 'opacity-0 invisible')
-                  : 'opacity-0 invisible group-hover:opacity-100 group-hover:visible'
-              }`}>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                  value={volume}
-                  onChange={handleVolumeChange}
-                  className="flex-1 h-1 bg-neutral-600 rounded-lg appearance-none cursor-pointer slider"
-                />
-                <span className="text-xs text-neutral-400 min-w-[2rem]">
-                  {Math.round(volume * 100)}%
-                </span>
-              </div>
-            </div>
-
             <button
               onClick={handlePrevPage}
               disabled={currentPage === 0}
@@ -243,20 +285,8 @@ export function TestTracks({ tracks, searchQuery = "", hasTrackMatch = false }: 
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
-        )}
-      </div>
-
-      {/* Track List */}
-      <div className="grid gap-2">
-        {currentTracks.map((track, index) => (
-          <TrackRow 
-            key={startIndex + index} 
-            track={track} 
-            searchQuery={searchQuery}
-            hasTrackMatch={hasTrackMatch}
-          />
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

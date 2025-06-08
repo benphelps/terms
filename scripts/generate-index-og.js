@@ -53,7 +53,7 @@ async function generateIndexOG() {
     ctx.fillStyle = '#9ca3af'; // neutral-400
     ctx.font = '28px Arial, sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText('Interactive reference for audio enthusiasts', 60, 100);
+    ctx.fillText('Interactive Audio Reference', 60, 100);
 
     // Site URL
     ctx.fillStyle = '#6b7280'; // neutral-500 (slightly dimmer)
