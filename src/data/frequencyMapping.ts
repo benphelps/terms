@@ -1,3 +1,5 @@
+import type { FrequencyMapping } from '../types';
+
 export const frequencyMapping: FrequencyMapping = {
   // High frequencies - "air" and brilliance range
   // Sources: https://www.gear4music.com/blog/audio-frequency-range/
