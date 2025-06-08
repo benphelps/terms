@@ -232,7 +232,7 @@ export const audioTermTracks = {
   Warm: [
     "Bill Withers - Ain't No Sunshine",
     "Marvin Gaye - What's Going On",
-    "John Mayer - Gravity (from Continuum)",
+    "John Mayer - Gravity",
     "Chris Jones - Long After You Are Gone",
     "Diana Krall - The Look of Love",
     "Diana Krall - Temptation",
